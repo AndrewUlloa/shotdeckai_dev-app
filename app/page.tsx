@@ -1,103 +1,79 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default function PrelaunchPage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-background text-foreground">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside space-y-4 list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-muted text-muted-foreground px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly 24/7.</li>
-          <Button>Get your invitation today</Button>
-        </ol>
-        <div><button>Get your invitation</button></div>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-primary text-primary-foreground gap-2 hover:bg-primary/90 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-input transition-colors flex items-center justify-center hover:bg-accent hover:text-accent-foreground text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className="w-full min-h-screen bg-black shadow-inner flex flex-col justify-between">
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-safe flex flex-col justify-between flex-grow">
+        <header className="w-full flex justify-between items-center py-6">
+          <div className="rounded-md flex items-center gap-[35px]">
+            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
+              <Image src="/logo.png" alt="ShotDeckAI Logo" width={24} height={24} />
+            </div>
+          </div>
+          <button className="px-4 py-2 bg-gradient-button rounded-full shadow shadow-inner border border-white text-white text-sm sm:text-base font-semibold font-inter">
+            Get your invitation
+          </button>
+        </header>
+
+        <main className="w-full flex-grow flex flex-col lg:flex-row justify-between items-start gap-10 py-10">
+          <div className="flex-grow flex-col justify-start items-start gap-5 max-w-2xl">
+            <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-[80px] font-normal font-instrument-serif leading-tight">
+              Your Creative Vision, Realized Instantly—With AI That Feels Like Magic
+            </h1>
+            <p className="text-white text-lg sm:text-xl font-semibold font-inter leading-normal mt-4">
+              Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates
+              your needs, delivering cinematic storyboards and ideas faster than a thought.
+            </p>
+            <Button className="px-4 py-2 bg-gradient-button rounded-full shadow shadow-inner border border-white text-white text-sm sm:text-base font-semibold font-inter mt-6">
+              Get your invitation
+            </Button>
+          </div>
+          <div className="w-full lg:w-[400px] py-1.5 flex-col justify-start items-start gap-2.5">
+            <div className="w-full h-[43px] px-3 py-2.5 bg-white/10 rounded-full border border-white backdrop-blur-[10px] flex items-center">
+              <input
+                type="text"
+                placeholder="My story looks and feels like..."
+                className="grow bg-transparent text-white text-xs font-semibold font-inter leading-[14.40px] outline-none"
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">Style</span>
+                <div className="px-1.5 py-[5px] bg-gradient-button rounded-full shadow shadow-inner border border-white w-6 h-6"></div>
+              </div>
+            </div>
+            <div className="w-full h-[346px] px-2.5 py-5 bg-white/10 rounded-[20px] shadow shadow-inner border border-white backdrop-blur-[10px] flex-col justify-center items-center mt-4">
+              <div className="w-full h-[270px] bg-white/30 rounded-lg border border-white/50 flex items-center justify-center">
+                <Image src="/logo.png" alt="Preview" width={32} height={32} />
+              </div>
+              <div className="w-full mt-2 bg-white/20 rounded-lg border border-white/50 flex justify-between items-center">
+                {['Shot Details', 'Audio', 'Visual'].map((item) => (
+                  <Button key={item} className="flex-1 h-[26px] px-2 sm:px-[30px] py-1.5 flex items-center justify-center">
+                    <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">{item}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <footer className="w-full py-5 border-t-2 border-white/10 backdrop-blur-[35px] flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
+              <Image src="/logo.png" alt="ShotDeckAI Logo" width={24} height={24} />
+            </div>
+            <span className="text-white text-2xl sm:text-[32px] font-bold font-supreme-ll leading-loose">ShotDeckAI</span>
+          </div>
+          <div className="text-white text-xs font-supreme-ll">built with love in bogota ❤️</div>
+          <div className="flex gap-5">
+            {['tiktok', 'instagram', 'facebook', 'twitter', 'linkedin'].map((social) => (
+              <Link key={social} href="#" aria-label={social} className="w-7 h-7 p-1 bg-white/10 rounded shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
+                <Image src={`/${social}-icon.png`} alt={social} width={20} height={20} />
+              </Link>
+            ))}
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
