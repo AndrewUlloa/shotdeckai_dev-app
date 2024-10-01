@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico', // Path to your favicon
     apple: '/apple-touch-icon.png', // Path to Apple Touch Icon
+    android: '/android-chrome-192x192.png', // Path to Android Chrome Icon
+    safari: '/safari-pinned-tab.svg', // Path to Safari Icon
   },
 };
 
