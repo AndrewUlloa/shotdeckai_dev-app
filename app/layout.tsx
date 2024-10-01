@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   description: "Your Creative Vision, Realized Instantly—With AI That Feels Like Magic",
   icons: {
     icon: '/favicon.ico', // Path to your favicon
+    apple: '/apple-touch-icon.png', // Path to Apple Touch Icon
   },
 };
 
@@ -29,6 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
