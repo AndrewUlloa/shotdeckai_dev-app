@@ -10,6 +10,11 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .mask-button {
+    mask-image: linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    mask-clip: padding-box, border-box;
+  }
 }
 
 @layer base {
