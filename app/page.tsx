@@ -9,7 +9,7 @@ export default function PrelaunchPage() {
         <header className="w-full flex justify-between items-center py-6">
           <div className="rounded-md flex items-center gap-[35px]">
             <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
-              <Image src="/logo.png" alt="ShotDeckAI Logo" width={24} height={24} />
+              <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
           </div>
           <Button>
@@ -62,7 +62,7 @@ export default function PrelaunchPage() {
         <footer className="w-full py-5 border-t-2 border-white/10 backdrop-blur-[35px] flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
-              <Image src="/logo.png" alt="ShotDeckAI Logo" width={24} height={24} />
+              <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
             <span className="text-white text-2xl sm:text-[32px] font-bold font-supreme-ll leading-loose">ShotDeckAI</span>
           </div>
