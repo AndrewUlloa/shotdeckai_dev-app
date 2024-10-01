@@ -12,9 +12,9 @@ export default function PrelaunchPage() {
               <Image src="/logo.png" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
           </div>
-          <button className="px-4 py-2 bg-gradient-button rounded-full shadow shadow-inner border border-white text-white text-sm sm:text-base font-semibold font-inter">
+          <Button>
             Get your invitation
-          </button>
+          </Button>
         </header>
 
         <main className="w-full flex-grow flex flex-col lg:flex-row justify-between items-start gap-10 py-10">
@@ -26,7 +26,7 @@ export default function PrelaunchPage() {
               Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates
               your needs, delivering cinematic storyboards and ideas faster than a thought.
             </p>
-            <Button className="px-4 py-2 bg-gradient-button rounded-full shadow shadow-inner border border-white text-white text-sm sm:text-base font-semibold font-inter mt-6">
+            <Button>
               Get your invitation
             </Button>
           </div>
@@ -48,9 +48,9 @@ export default function PrelaunchPage() {
               </div>
               <div className="w-full mt-2 bg-white/20 rounded-lg border border-white/50 flex justify-between items-center">
                 {['Shot Details', 'Audio', 'Visual'].map((item) => (
-                  <Button key={item} className="flex-1 h-[26px] px-2 sm:px-[30px] py-1.5 flex items-center justify-center">
+                  <button key={item} className="flex-1 h-[26px] px-2 sm:px-[30px] py-1.5 flex items-center justify-center">
                     <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">{item}</span>
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>

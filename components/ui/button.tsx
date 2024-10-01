@@ -11,7 +11,7 @@ const buttonVariants = cva(
         default: [
           "rounded-[17px] flex-1 flex justify-center items-center",
           "shadow-[inset_0_0px_1.5px_rgba(0,0,0,0.35)]",
-          "min-w-[163px] h-[32px]",
+          "max-w-[163px] h-[32px]",
         ],
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
