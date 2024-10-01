@@ -22,7 +22,7 @@ export default function Home() {
             .
           </li>
           <li>Save and see your changes instantly 24/7.</li>
-          <Button>Get your invitation</Button>
+          <Button>Get your invitation today</Button>
         </ol>
         <div><button>Get your invitation</button></div>
         <div className="flex gap-4 items-center flex-col sm:flex-row">
