@@ -27,7 +27,7 @@ export default function PrelaunchPage() {
               your needs, delivering cinematic storyboards and ideas faster than a thought.
             </p>
             <Button>
-              Get your invitation
+              Get your invitation now
             </Button>
           </div>
           <div className="w-full lg:w-[400px] py-1.5 flex-col justify-start items-start gap-2.5">
