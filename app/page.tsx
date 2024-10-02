@@ -49,7 +49,7 @@ export default function Home() {
             </div>
             <div className="w-full h-[346px] px-2.5 py-5 bg-white/10 rounded-[20px] .shadow shadow-inner border border-white backdrop-blur-[10px] flex flex-col justify-center items-center mt-4">
               <div className="w-full h-[270px] bg-white/30 rounded-lg border border-white/50 flex items-center justify-center">
-                <Image src="/favicon.ico" alt="Preview" width={32} height={32} />
+                <Image src="/favicon.ico" alt="Preview" width={32} height={32} className="rounded-[3px]"/>
               </div>
               <div className="w-full mt-2 bg-white/20 rounded-lg border border-white/50 flex justify-between items-center">
                 {['Shot Details', 'Audio', 'Visual'].map((item) => (
