@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/Icon";
+import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 
 export default function Home() {
   return (
@@ -42,7 +43,7 @@ export default function Home() {
                 placeholder="My story looks and feels like..."
                 className="grow bg-transparent text-white text-xs font-semibold font-inter leading-[14.40px] outline-none"
               />
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">Style</span>
                 <div className="px-1.5 py-[5px] bg-gradient-button rounded-full .shadow shadow-inner border border-white w-6 h-6"></div>
               </div>
@@ -57,8 +58,9 @@ export default function Home() {
                     <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">{item}</span>
                   </button>
                 ))}
-              </div>
+              </div> */}
             </div>
+            <StoryboardFrameComponent />
           </div>
         </main>
 
