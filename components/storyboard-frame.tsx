@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-
+import Image from 'next/image'
 interface ShotDescription {
   type: string
   cameraMovement: string
@@ -149,12 +149,26 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
     <Card className="w-full max-w-3xl mx-auto">
       <CardContent className="space-y-6 pt-6">
         <div className="aspect-video w-full overflow-hidden rounded-lg">
-          <img 
-            src={frameData.imageUrl} 
-            alt={`Storyboard frame for Scene ${frameData.sceneNumber}, Shot ${frameData.shotNumber}`} 
-            className="w-full h-full object-cover"
-          />
+          <div className="relative w-full h-full">
+            {frameData.imageUrl ? (
+              <Image 
+                src={frameData.imageUrl || '/favicon.ico'}
+                alt={`Storyboard frame for Scene ${frameData.sceneNumber}, Shot ${frameData.shotNumber}`} 
+                className="w-full h-full object-cover"
+                width={1920}
+                height={1080}
+                priority
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <div className="text-gray-400 text-lg font-medium">
+                  No image available
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+    
         
         <div className="space-y-4">
           <div className="flex rounded-lg overflow-hidden">
