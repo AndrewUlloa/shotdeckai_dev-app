@@ -6,10 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 export default function Home() {
   return (
     <div 
-      className="w-full min-h-screen bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between safe-top"
-      style={{
-        backgroundImage: `url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/1dfb1fca-95a0-4769-05fd-e2d376896100/public')`
-      }}
+      className="w-full min-h-screen bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between safe-top bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/1dfb1fca-95a0-4769-05fd-e2d376896100/public')]"
     >
       <div className="w-full max-2xl:px-4 mt-1 sm:px-4 lg:px-8 pt-safe flex flex-col justify-between flex-grow">
         <header className="w-full flex justify-between items-center py-6">
@@ -47,10 +44,10 @@ export default function Home() {
               />
               <div className="flex items-center gap-2">
                 <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">Style</span>
-                <div className="px-1.5 py-[5px] bg-gradient-button rounded-full shadow shadow-inner border border-white w-6 h-6"></div>
+                <div className="px-1.5 py-[5px] bg-gradient-button rounded-full .shadow shadow-inner border border-white w-6 h-6"></div>
               </div>
             </div>
-            <div className="w-full h-[346px] px-2.5 py-5 bg-white/10 rounded-[20px] shadow shadow-inner border border-white backdrop-blur-[10px] flex flex-col justify-center items-center mt-4">
+            <div className="w-full h-[346px] px-2.5 py-5 bg-white/10 rounded-[20px] .shadow shadow-inner border border-white backdrop-blur-[10px] flex flex-col justify-center items-center mt-4">
               <div className="w-full h-[270px] bg-white/30 rounded-lg border border-white/50 flex items-center justify-center">
                 <Image src="/favicon.ico" alt="Preview" width={32} height={32} />
               </div>
@@ -67,7 +64,7 @@ export default function Home() {
 
         <footer className="w-full py-4 border-t-2 border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
+            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm .shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
               <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={32} height={32} />
             </div>
             <span className="text-white text-2xl sm:text-[32px] font-bold font-supreme-ll leading-loose">ShotDeckAI</span>
