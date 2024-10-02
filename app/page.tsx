@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 export default function Home() {
   return (
     <div 
-      className="w-full min-h-screen bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between safe-top bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/1dfb1fca-95a0-4769-05fd-e2d376896100/public')]"
+      className="w-full min-h-screen bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between pt-safe bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/1dfb1fca-95a0-4769-05fd-e2d376896100/public')]"
     >
       <div className="w-full max-2xl:px-4 mt-1 sm:px-4 lg:px-8 pt-safe flex flex-col justify-between flex-grow">
         <header className="w-full flex justify-between items-center py-6">
@@ -73,7 +73,7 @@ export default function Home() {
           <div className="flex gap-5 justify-center items-center">
             {['icon-1', 'icon-2', 'icon-3', 'icon-4', 'icon-5'].map((iconName, index) => (
               <Link key={iconName} href="#" aria-label={`Social media link ${index + 1}`} className="w-7 h-7 p-1 bg-white/10 rounded .shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
-                <Icon name={iconName} className="w-5 h-5" />
+                <Icon name={iconName} className="w-5 h-5"/>
               </Link>
             ))}
           </div>

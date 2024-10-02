@@ -7,12 +7,22 @@ body {
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  @supports (text-wrap: balance) {
+    .text-balance {
+      text-wrap: balance;
+    }
+  }
+  @supports not (text-wrap: balance) {
+    .text-balance {
+      word-break: break-word;
+    }
   }
   .mask-button {
+    -webkit-mask-image: linear-gradient(#fff 0 0);
     mask-image: linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
     mask-composite: xor;
+    -webkit-mask-clip: padding-box, border-box;
     mask-clip: padding-box, border-box;
   }
 }
