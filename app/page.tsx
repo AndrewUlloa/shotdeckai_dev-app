@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/Icon";
 
 export default function Home() {
   return (
@@ -51,7 +52,7 @@ export default function Home() {
             </div>
             <div className="w-full h-[346px] px-2.5 py-5 bg-white/10 rounded-[20px] shadow shadow-inner border border-white backdrop-blur-[10px] flex flex-col justify-center items-center mt-4">
               <div className="w-full h-[270px] bg-white/30 rounded-lg border border-white/50 flex items-center justify-center">
-                <Image src="/logo.png" alt="Preview" width={32} height={32} />
+                <Image src="/favicon.ico" alt="Preview" width={32} height={32} />
               </div>
               <div className="w-full mt-2 bg-white/20 rounded-lg border border-white/50 flex justify-between items-center">
                 {['Shot Details', 'Audio', 'Visual'].map((item) => (
@@ -72,10 +73,10 @@ export default function Home() {
             <span className="text-white text-2xl sm:text-[32px] font-bold font-supreme-ll leading-loose">ShotDeckAI</span>
           </div>
           <div className="text-white text-xs font-supreme-ll">built with love in bogota ❤️</div>
-          <div className="flex gap-5">
-            {['tiktok', 'instagram', 'facebook', 'twitter', 'linkedin'].map((social) => (
-              <Link key={social} href="#" aria-label={social} className="w-7 h-7 p-1 bg-white/10 rounded shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
-                <Image src={`/${social}-icon.png`} alt={social} width={20} height={20} />
+          <div className="flex gap-5 justify-center items-center">
+            {['icon-1', 'icon-2', 'icon-3', 'icon-4', 'icon-5'].map((iconName, index) => (
+              <Link key={iconName} href="#" aria-label={`Social media link ${index + 1}`} className="w-7 h-7 p-1 bg-white/10 rounded shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
+                <Icon name={iconName} className="w-5 h-5" />
               </Link>
             ))}
           </div>

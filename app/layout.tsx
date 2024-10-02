@@ -20,9 +20,8 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico', // Path to your favicon
     apple: '/apple-touch-icon.png', // Path to Apple Touch Icon
-    android: '/android-chrome-192x192.png', // Path to Android Chrome Icon
-    safari: '/safari-pinned-tab.svg', // Path to Safari Icon
   },
+  manifest: '/manifest.json', // Path to your manifest file
 };
 
 export default function RootLayout({
@@ -34,7 +33,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       </head>
       <body

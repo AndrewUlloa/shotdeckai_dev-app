@@ -51,7 +51,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <div className="rounded-[17px] flex-1 flex justify-center items-center shadow-[inset_0_0px_1.5px_rgba(0,0,0,0.35)]">
           <div className="rounded-[17px] flex-1 flex justify-center items-center bg-gradient-to-b from-black via-black to-[#96969640] p-[0.3px] shadow-[inset_0_-0.2px_1px_rgba(0,0,0,0.25)]">
             <div className="rounded-[17px] flex-1 flex justify-center items-center bg-gradient-to-b from-white via-[#3c3c3c] to-[#edbfe5] m-[0.2px] p-[1.3px]">
-              <div className="rounded-[17px] flex-1 flex justify-center items-center shadow-[0_5px_15px_rgba(0,0,0,0.25), inset_0_-2px_10px_#9e9eaa] bg-gradient-to-b from-[#c2c2c2] to-[#9e9eaa] shadow-[inset_0_-2px_10px_#9e9eaa] shadow-[0_5px_15px_rgba(0,0,0,0.25)]">
+              <div className="rounded-[17px] flex-1 flex justify-center items-center shadow-[0_5px_15px_rgba(0,0,0,0.25), inset_0_-2px_10px_#9e9eaa] bg-gradient-to-b from-[#c2c2c2] to-[#9e9eaa] .shadow-[inset_0_-2px_10px_#9e9eaa] shadow-[0_5px_15px_rgba(0,0,0,0.25)]">
                 <div className="rounded-[17px] px-2.5 py-[6.5px] text-base font-semibold leading-[19px] font-inter text-white whitespace-nowrap bg-gradient-to-b from-[#c2c2c2] to-[#9e9eaa] [text-shadow:0_-0.5px_#3d3d3d,0_0.05px_1px_rgba(0,0,0,0.15)]">
                   {props.children}
                 </div>
