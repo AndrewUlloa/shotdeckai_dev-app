@@ -11,7 +11,7 @@ export default function Home() {
       <div className="w-full max-2xl:px-4 mt-1 sm:px-4 lg:px-8 pt-safe flex flex-col justify-between flex-grow">
         <header className="w-full flex justify-between items-center py-6">
           <div className="rounded-md flex items-center gap-[35px]">
-            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
+            <div className="w-8 h-8 p-[3px] bg-white/10 rounded-sm .shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
               <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function Home() {
           <div className="text-white text-xs font-supreme-ll">built with love in bogota ❤️</div>
           <div className="flex gap-5 justify-center items-center">
             {['icon-1', 'icon-2', 'icon-3', 'icon-4', 'icon-5'].map((iconName, index) => (
-              <Link key={iconName} href="#" aria-label={`Social media link ${index + 1}`} className="w-7 h-7 p-1 bg-white/10 rounded shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
+              <Link key={iconName} href="#" aria-label={`Social media link ${index + 1}`} className="w-7 h-7 p-1 bg-white/10 rounded .shadow shadow-inner border border-white backdrop-blur-[10px] flex items-center justify-center">
                 <Icon name={iconName} className="w-5 h-5" />
               </Link>
             ))}
