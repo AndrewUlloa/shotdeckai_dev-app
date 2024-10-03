@@ -93,6 +93,7 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
     }))
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleShotDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFrameData(prev => ({
