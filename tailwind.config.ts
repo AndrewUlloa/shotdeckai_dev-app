@@ -86,6 +86,49 @@ const config: Config = {
       'inter': ['Inter', 'sans-serif'],
     }
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.border-gradient': {
+          'position': 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: '0',
+            padding: '1px', // Adjust this value to change border thickness
+            borderRadius: 'inherit',
+            background: 'linear-gradient(162deg, rgba(255,255,255,0.5) 0%, rgba(54,54,54,0.05) 50%, rgba(153,153,153,0.5) 100%)',
+            '-webkit-mask': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) 100%',
+            '-webkit-mask-composite': 'xor',
+            'mask-composite': 'exclude',
+            'pointer-events': 'none',
+          },
+        },
+        '.border-gradient-lg': {
+          'position': 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: '0',
+            padding: '1px', // Adjust this value to change border thickness
+            borderRadius: 'inherit',
+            background: 'linear-gradient(105deg, rgba(255,255,255,0.5) 0%, rgba(54,54,54,0.05) 50%, rgba(153,153,153,0.5) 100%) ',
+            '-webkit-mask': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            '-webkit-mask-composite': 'xor',
+            'mask-composite': 'exclude',
+            'pointer-events': 'none',
+          },
+        },
+        '.frame-bg-effects-blur-light': {
+          'background-filter': 'blur(10px)',
+          'box-shadow': '0px 5px 15px 0px #00000025',
+        },
+        '.frame-bg-effects-blur-inner': {
+          'box-shadow': 'rgba(158, 158, 170, 0.25)  inset',
+        },
+      };
+      addUtilities(newUtilities);
+    }
+  ],
 };
 export default config;

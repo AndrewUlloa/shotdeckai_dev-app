@@ -37,11 +37,11 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full lg:w-[400px] py-1.5 flex flex-col justify-start items-start gap-2.5">
-            <div className="w-full h-[43px] px-3 py-2.5 bg-white/10 rounded-full border border-white backdrop-blur-[10px] flex items-center">
+            <div className="w-full h-[43px] px-3 py-2.5 bg-white/10 rounded-full border-gradient backdrop-blur-[10px] flex items-center">
               <input
                 type="text"
                 placeholder="My story looks and feels like..."
-                className="grow bg-transparent text-white text-xs font-semibold font-inter leading-[14.40px] outline-none"
+                className="grow bg-transparent text-white text-xs font-semibold font-inter leading-[14.40px] outline-none placeholder:text-white"
               />
               {/* <div className="flex items-center gap-2">
                 <span className="text-white text-xs font-semibold font-inter leading-[14.40px]">Style</span>

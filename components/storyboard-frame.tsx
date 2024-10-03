@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown } from "lucide-react"
+import { ChevronUp } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -146,13 +146,13 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
   )
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardContent className="space-y-6 pt-6">
-        <div className="aspect-video w-full overflow-hidden rounded-lg">
+    <Card className="w-full max-w-3xl mx-auto frame-bg-effects-blur-light">
+      <CardContent className="space-y-3 p-5 ">
+        <div className="aspect-video w-full overflow-hidden border-white/50 bg-white/30 rounded-lg">
           <div className="relative w-full h-full">
             {frameData.imageUrl ? (
               <Image 
-                src={frameData.imageUrl || '/favicon.ico'}
+                src={frameData.imageUrl}
                 alt={`Storyboard frame for Scene ${frameData.sceneNumber}, Shot ${frameData.shotNumber}`} 
                 className="w-full h-full object-cover"
                 width={1920}
@@ -161,7 +161,14 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <div className="text-gray-400 text-lg font-medium">
+                <div className="text-gray-400 text-sm font-medium flex flex-col items-center">
+                  <Image 
+                    src="/favicon.ico"
+                    alt="No image available"
+                    className="w-10 h-10 mb-2"
+                    width={32}
+                    height={32}
+                  />
                   No image available
                 </div>
               </div>
@@ -170,20 +177,20 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
         </div>
     
         
-        <div className="space-y-4">
-          <div className="flex rounded-lg overflow-hidden">
+        <div className="space-y-3">
+          <div className="flex rounded-lg overflow-hidden border bg-white/20 border-white/50">
             {menuItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => toggleOpen(item.key)}
-                className={`flex-1 py-2 px-4 text-sm font-medium transition-colors duration-200 flex items-center justify-center ${
+                className={`flex-1 py-1 px-1 text-sm font-semibold transition-colors duration-200 flex items-center justify-center ${
                   activeSection === item.key && isOpen
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
                 {item.label}
-                <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${
+                <ChevronUp className={`ml-2 h-4 w-4 transition-transform duration-200 ${
                   activeSection === item.key && isOpen ? 'transform rotate-180' : ''
                 }`} />
               </button>
@@ -203,7 +210,7 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="relative h-[400px] w-full overflow-hidden rounded-md border">
+                <div className="relative h-[400px] w-full overflow-hidden rounded-lg border-white/50 border">
                   <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                       key={activeSection}
@@ -213,16 +220,16 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                       animate="center"
                       exit="exit"
                       transition={{
-                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        x: { ease: [0.455, 0.03, 0.515, 0.955], duration: 0.50},
                         opacity: { duration: 0.2 }
                       }}
                       className="absolute w-full h-full"
                     >
-                      <ScrollArea className="w-full h-full p-4">
+                      <ScrollArea className="w-full h-full p-4 border-white/50 bg-white/30">
                         {activeSection === 'shot' && (
-                          <div className="space-y-4">
-                            <div className="space-y-4">
-                              <h3 className="font-semibold text-lg">Shot Description</h3>
+                          <div className="space-y-2">
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-lg text-white">Shot Description</h3>
                               {renderEditableField("Type", "type", frameData.shotDescription.type)}
                               {renderEditableField("Camera Movement", "cameraMovement", frameData.shotDescription.cameraMovement)}
                               {renderEditableField("Angle", "angle", frameData.shotDescription.angle)}
@@ -232,14 +239,14 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                           </div>
                         )}
                         {activeSection === 'audio' && (
-                          <div className="space-y-4">
+                          <div className="space-y-2">
                             {renderEditableField("Dialogue", "dialogue", frameData.dialogue, true)}
                             {renderEditableField("Sound Effects", "soundEffects", frameData.soundEffects, true)}
                             {renderEditableField("Music", "music", frameData.music, true)}
                           </div>
                         )}
                         {activeSection === 'visual' && (
-                          <div className="space-y-4">
+                          <div className="space-y-2">
                             {renderEditableField("Lighting", "lighting", frameData.lighting)}
                             {renderEditableField("Mood", "mood", frameData.mood)}
                             {renderEditableField("Composition", "composition", frameData.composition, true)}
