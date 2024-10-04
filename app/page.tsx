@@ -25,7 +25,7 @@ export default function Home() {
 
         <main className="w-full flex-1 flex flex-col lg:flex-row justify-between items-start gap-10 py-10 overflow-auto">
           <div className="flex-grow flex flex-col justify-start items-start gap-4 max-w-2xl">
-            <h1 className="text-white text-2xl sm:text-6xl font-semibold font-supreme-ll leading-loose">  
+            <h1 className="text-center xl:text-left text-white text-2xl sm:text-6xl font-semibold font-supreme-ll leading-loose">  
               Your Creative Vision, Realized Instantly—With AI That Feels Like Magic
             </h1>
             <p className="text-white text-lg sm:text-xl font-semibold font-inter leading-normal mt-2 max-w-xl">
