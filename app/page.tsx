@@ -24,11 +24,11 @@ export default function Home() {
         </header>
 
         <main className="w-full flex-1 flex flex-col lg:flex-row justify-between items-start gap-10 py-10 overflow-auto">
-          <div className="flex-grow flex flex-col justify-start items-start gap-4 max-w-2xl">
-            <h1 className="text-center xl:text-left text-white text-2xl sm:text-6xl font-semibold font-supreme-ll leading-loose">  
+          <div className="flex-grow flex flex-col justify-start items-start gap-2 xl:gap-4 max-w-2xl">
+            <h1 className="text-center xl:text-left text-black xl:text-white text-[26px] xl:text-6xl font-semibold leading-loose">  
               Your Creative Vision, Realized Instantly—With AI That Feels Like Magic
             </h1>
-            <p className="text-white text-lg sm:text-xl font-semibold font-inter leading-normal mt-2 max-w-xl">
+            <p className="text-center xl:text-left text-black xl:text-white text-lg sm:text-xl font-regular font-inter leading-normal mt-2 max-w-xl">
               Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates
               your needs, delivering cinematic storyboards and ideas faster than a thought.
             </p>

@@ -1,9 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  font-family: 'Instrument Serif', serif;
+}
+
+p {
+  font-family: 'Inter', sans-serif;
 }
 
 @layer utilities {
