@@ -58,7 +58,7 @@ const defaultProps: StoryboardFrameProps = {
   costumeAndProps: 'Not specified',
   cinematographicStyle: 'Not specified',
   postProductionNotes: 'Not specified',
-  imageUrl: '/placeholder.svg?height=300&width=400'
+  imageUrl: '/favicon.ico?height=300&width=400'
 }
 
 export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {

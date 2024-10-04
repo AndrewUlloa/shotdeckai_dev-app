@@ -126,6 +126,9 @@ const config: Config = {
         '.frame-bg-effects-blur-inner': {
           'box-shadow': 'rgba(158, 158, 170, 0.25)  inset',
         },
+        '.bg-fixed': {
+          'background-attachment': 'fixed',
+        },
       };
       addUtilities(newUtilities);
     }
