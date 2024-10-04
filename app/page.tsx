@@ -9,7 +9,7 @@ import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 export default function Home() {
   return (
     <div 
-      className="w-full h-screen overflow-hidden bg-fixed bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]"
+      className="w-full h-screen overflow-hidden bg-fixed bg-cover bg-center bg-no-repeat shadow-inner flex flex-col justify-between bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] sm:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] 2xl:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]"
     >
       <div className="w-full max-2xl:px-4 mt-1 sm:px-4 lg:px-8 pt-safe flex flex-col justify-between h-full">
         <header className="w-full flex justify-between items-center py-6">
