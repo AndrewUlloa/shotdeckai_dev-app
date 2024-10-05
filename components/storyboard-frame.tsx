@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { motion, AnimatePresence } from "framer-motion"
-import { ChevronUp } from "lucide-react"
+// import { ScrollArea } from "@/components/ui/scroll-area"
+// import { motion, AnimatePresence } from "framer-motion"
+// import { ChevronUp } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
