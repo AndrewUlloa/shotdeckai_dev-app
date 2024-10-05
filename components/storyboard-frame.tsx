@@ -148,7 +148,7 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
 
   return (
     <Card className="w-full max-w-3xl mx-auto frame-bg-effects-blur-light">
-      <CardContent className="space-y-3 p-5 ">
+      <CardContent className="space-y-4 p-5 ">
         <div className="aspect-video w-full overflow-hidden border-white/50 bg-white/30 rounded-lg">
           <div className="relative w-full h-full">
             {frameData.imageUrl ? (
@@ -156,8 +156,8 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                 src={frameData.imageUrl}
                 alt={`Storyboard frame for Scene ${frameData.sceneNumber}, Shot ${frameData.shotNumber}`} 
                 className="w-full h-full object-cover"
-                width={1920}
-                height={1080}
+                width={300}
+                height={255}
                 priority
               />
             ) : (
@@ -178,7 +178,7 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
         </div>
     
         
-        <div className="space-y-3">
+        {/* <div className="space-y-3">
           <div className="flex rounded-lg overflow-hidden border bg-white/20 border-white/50">
             {menuItems.map((item) => (
               <button
@@ -196,77 +196,42 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                 }`} />
               </button>
             ))}
-          </div>
+          </div> */}
 
-          <AnimatePresence initial={false} custom={direction}>
-            {isOpen && (
-              <motion.div
-                key="content"
-                initial="collapsed"
-                animate="open"
-                exit="collapsed"
-                variants={{
-                  open: { opacity: 1, height: 'auto' },
-                  collapsed: { opacity: 0, height: 0 }
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="relative h-[400px] w-full overflow-hidden rounded-lg border-white/50 border">
-                  <AnimatePresence initial={false} custom={direction}>
-                    <motion.div
-                      key={activeSection}
-                      custom={direction}
-                      variants={variants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{
-                        x: { ease: [0.455, 0.03, 0.515, 0.955], duration: 0.50},
-                        opacity: { duration: 0.2 }
-                      }}
-                      className="absolute w-full h-full"
-                    >
-                      <ScrollArea className="w-full h-full p-4 border-white/50 bg-white/30">
-                        {activeSection === 'shot' && (
-                          <div className="space-y-2">
-                            <div className="space-y-2">
-                              <h3 className="font-semibold text-lg text-white">Shot Description</h3>
-                              {renderEditableField("Type", "type", frameData.shotDescription.type)}
-                              {renderEditableField("Camera Movement", "cameraMovement", frameData.shotDescription.cameraMovement)}
-                              {renderEditableField("Angle", "angle", frameData.shotDescription.angle)}
-                            </div>
-                            {renderEditableField("Action", "actionDescription", frameData.actionDescription, true)}
-                            {renderEditableField("Timing", "timing", frameData.timing)}
-                          </div>
-                        )}
-                        {activeSection === 'audio' && (
-                          <div className="space-y-2">
-                            {renderEditableField("Dialogue", "dialogue", frameData.dialogue, true)}
-                            {renderEditableField("Sound Effects", "soundEffects", frameData.soundEffects, true)}
-                            {renderEditableField("Music", "music", frameData.music, true)}
-                          </div>
-                        )}
-                        {activeSection === 'visual' && (
-                          <div className="space-y-2">
-                            {renderEditableField("Lighting", "lighting", frameData.lighting)}
-                            {renderEditableField("Mood", "mood", frameData.mood)}
-                            {renderEditableField("Composition", "composition", frameData.composition, true)}
-                            {renderEditableField("Special Effects", "specialEffects", frameData.specialEffects, true)}
-                            {renderEditableField("Character Notes", "characterNotes", frameData.characterNotes, true)}
-                            {renderEditableField("Environment", "environmentNotes", frameData.environmentNotes, true)}
-                            {renderEditableField("Costume & Props", "costumeAndProps", frameData.costumeAndProps, true)}
-                            {renderEditableField("Cinematographic Style", "cinematographicStyle", frameData.cinematographicStyle, true)}
-                            {renderEditableField("Post-production Notes", "postProductionNotes", frameData.postProductionNotes, true)}
-                          </div>
-                        )}
-                      </ScrollArea>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* <AnimatePresence initial={false} custom={direction}>
+          {isOpen && (
+            <motion.div
+              key="content"
+              initial="collapsed"
+              animate="open"
+              exit="collapsed"
+              variants={{
+                open: { opacity: 1, height: 'auto' },
+                collapsed: { opacity: 0, height: 0 }
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="relative h-[400px] w-full overflow-hidden rounded-lg border-white/50 border">
+                <AnimatePresence initial={false} custom={direction}>
+                  <motion.div
+                    key={activeSection}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { ease: [0.455, 0.03, 0.515, 0.955], duration: 0.50},
+                      opacity: { duration: 0.2 }
+                    }}
+                    className="absolute w-full h-full"
+                  >
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence> */}
       </CardContent>
     </Card>
   )

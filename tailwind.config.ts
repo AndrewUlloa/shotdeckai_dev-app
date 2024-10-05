@@ -129,6 +129,9 @@ const config: Config = {
         '.bg-fixed': {
           'background-attachment': 'fixed',
         },
+        '.body-shadow': {
+          'box-shadow': 'inset 5px 5px 60px 0px #171D0020',
+        }
       };
       addUtilities(newUtilities);
     }

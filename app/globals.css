@@ -11,10 +11,35 @@ body {
 
 h1 {
   font-family: 'Instrument Serif', serif;
+  line-height: 1.2;
+  letter-spacing: -0.08em;
+}
+h1 {
+  @media screen and (min-width: 768px) {
+    font-family: 'Instrument Serif', serif;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+}
+p {
+  @media screen and (min-width: 768px) {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.2;
+  }
+}
+
+@layer utilities {
+  .line-height-1 {
+    line-height: 1.2;
+  }
+  .letter-spacing-0 {
+    letter-spacing: 0;
+  }
 }
 
 p {
   font-family: 'Inter', sans-serif;
+  line-height: 1.2;
 }
 
 @layer utilities {
@@ -37,6 +62,7 @@ p {
     mask-clip: padding-box, border-box;
   }
 }
+
 
 @layer base {
   :root {

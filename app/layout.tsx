@@ -37,7 +37,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full overflow-auto bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/1dfb1fca-95a0-4769-05fd-e2d376896100/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
+        className={`${geistSans.variable} ${geistMono.variable}  w-full overflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
       >
         <Providers>{children}</Providers>
       </body>
