@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui/icon";
 import { StoryboardFrameComponent } from "@/components/storyboard-frame";
-
+import { ArrowUp } from "lucide-react";
 
 export default function Home() {
   return (
@@ -31,7 +31,7 @@ export default function Home() {
             your needs, delivering cinematic storyboards and ideas faster than a thought.
           </p>
           <div className="hidden xl:block xl:mt-5">
-            <Button>
+            <Button >
               Get your invitation
             </Button>
           </div>
@@ -43,6 +43,9 @@ export default function Home() {
               placeholder="My story looks and feels like..."
               className="grow bg-transparent text-white text-xs font-semibold font-inter outline-none placeholder:text-white"
             />
+            <Button variant="secondary" size="input" className="ml-1">
+              <ArrowUp className="w-4 h-4" />
+            </Button>
           </div>
           <StoryboardFrameComponent />
         </div>
