@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 // import { ScrollArea } from "@/components/ui/scroll-area"
 // import { motion, AnimatePresence } from "framer-motion"
 // import { ChevronUp } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+// import { Input } from "@/components/ui/input"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Label } from "@/components/ui/label"
 import Image from 'next/image'
 interface ShotDescription {
   type: string
@@ -63,35 +63,35 @@ const defaultProps: StoryboardFrameProps = {
 
 export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
   const [frameData, setFrameData] = useState<StoryboardFrameProps>({ ...defaultProps, ...props })
-  const [activeSection, setActiveSection] = useState<string>('shot')
-  const [isOpen, setIsOpen] = useState(false)
-  const [direction, setDirection] = useState(0)
+  // const [activeSection, setActiveSection] = useState<string>('shot')
+  // const [isOpen, setIsOpen] = useState(false)
+  // const [direction, setDirection] = useState(0)
 
-  const menuItems = [
-    { key: 'shot', label: 'Shot Details' },
-    { key: 'audio', label: 'Audio' },
-    { key: 'visual', label: 'Visual' }
-  ]
+  // const menuItems = [
+  //   { key: 'shot', label: 'Shot Details' },
+  //   { key: 'audio', label: 'Audio' },
+  //   { key: 'visual', label: 'Visual' }
+  // ]
 
-  const toggleOpen = (section: string) => {
-    if (activeSection === section && isOpen) {
-      setIsOpen(false)
-    } else {
-      const newDirection = menuItems.findIndex(item => item.key === section) - 
-                           menuItems.findIndex(item => item.key === activeSection)
-      setDirection(newDirection)
-      setActiveSection(section)
-      setIsOpen(true)
-    }
-  }
+  // const toggleOpen = (section: string) => {
+  //   if (activeSection === section && isOpen) {
+  //     setIsOpen(false)
+  //   } else {
+  //     const newDirection = menuItems.findIndex(item => item.key === section) - 
+  //                          menuItems.findIndex(item => item.key === activeSection)
+  //     setDirection(newDirection)
+  //     setActiveSection(section)
+  //     setIsOpen(true)
+  //   }
+  // }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFrameData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  //   const { name, value } = e.target
+  //   setFrameData(prev => ({
+  //     ...prev,
+  //     [name]: value
+  //   }))
+  // }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleShotDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,46 +105,46 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
     }))
   }
 
-  const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
-  }
+  // const variants = {
+  //   enter: (direction: number) => ({
+  //     x: direction > 0 ? 1000 : -1000,
+  //     opacity: 0
+  //   }),
+  //   center: {
+  //     zIndex: 1,
+  //     x: 0,
+  //     opacity: 1
+  //   },
+  //   exit: (direction: number) => ({
+  //     zIndex: 0,
+  //     x: direction < 0 ? 1000 : -1000,
+  //     opacity: 0
+  //   })
+  // }
 
-  const renderEditableField = (label: string, name: string, value: string, multiline: boolean = false) => (
-    <div className="space-y-2 mb-4">
-      <Label htmlFor={name} className="text-sm font-medium">{label}</Label>
-      {multiline ? (
-        <Textarea
-          id={name}
-          name={name}
-          value={value}
-          onChange={handleInputChange}
-          className="w-full min-h-[100px]"
-        />
-      ) : (
-        <Input
-          type="text"
-          id={name}
-          name={name}
-          value={value}
-          onChange={handleInputChange}
-          className="w-full"
-        />
-      )}
-    </div>
-  )
+  // const renderEditableField = (label: string, name: string, value: string, multiline: boolean = false) => (
+  //   <div className="space-y-2 mb-4">
+  //     <Label htmlFor={name} className="text-sm font-medium">{label}</Label>
+  //     {multiline ? (
+  //       <Textarea
+  //         id={name}
+  //         name={name}
+  //         value={value}
+  //         onChange={handleInputChange}
+  //         className="w-full min-h-[100px]"
+  //       />
+  //     ) : (
+  //       <Input
+  //         type="text"
+  //         id={name}
+  //         name={name}
+  //         value={value}
+  //         onChange={handleInputChange}
+  //         className="w-full"
+  //       />
+  //     )}
+  //   </div>
+  // )
 
   return (
     <Card className="w-full max-w-3xl mx-auto frame-bg-effects-blur-light">
