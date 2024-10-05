@@ -32,7 +32,7 @@ export default function Home() {
           </p>
           <div className="hidden xl:block xl:mt-5">
             <Button >
-              Get your invitation
+              Get your invitation pizza
             </Button>
           </div>
         </div>
