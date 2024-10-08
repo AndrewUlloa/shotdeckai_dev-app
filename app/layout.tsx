@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   description: "Your Creative Vision, Realized Instantly—With AI That Feels Like Magic",
   icons: {
     icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
 };
@@ -32,7 +33,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="h-full">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
