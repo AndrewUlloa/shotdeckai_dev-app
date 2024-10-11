@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          "rounded-[17px] flex-1 flex justify-center items-center",
+          "rounded-[17px] flex justify-center items-center",
           "shadow-[inset_0_0px_1.5px_rgba(0,0,0,0.35)]",
           "max-w-[163px] h-[32px]",
         ],

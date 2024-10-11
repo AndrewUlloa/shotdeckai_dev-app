@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/icon";
 import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 import { ArrowUp } from "lucide-react";
 
-export default function Home() {
+export default function Home() { 
   return (
     <div 
       className="w-full min-h-screen sm:h-screen overflow-hidden bg-cover bg-center bg-no-repeat body-shadow flex flex-col pt-4 px-10 sm:px-8 bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] sm:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]"

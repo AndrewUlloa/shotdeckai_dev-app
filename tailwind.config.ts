@@ -84,10 +84,11 @@ const config: Config = {
     },
     fontFamily: {
       'inter': ['Inter', 'sans-serif'],
+      'supremeLL': ['supremeLL', 'sans-serif'],
     }
   },
   plugins: [
-    function ({ addUtilities }: { addUtilities: (utilities: Record<string, any>) => void }) {
+    function ({ addUtilities }: { addUtilities: (utilities: Record<string, Record<string, string | Record<string, string>>>) => void }) {
       const newUtilities = {
         '.border-gradient': {
           'position': 'relative',

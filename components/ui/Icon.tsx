@@ -8,9 +8,13 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
   color?: string;
 }
 
-export function Icon({ name, color = "currentColor", ...props }: IconProps) {
+export function Icon({ name, color = "currentColor", className, ...props }: IconProps) {
   return (
-    <svg {...props} fill={color} className="flex items-center justify-center">
+    <svg 
+      {...props} 
+      fill={color} 
+      className={`w-full h-full ${className || ''}`}
+    >
       <use href={`/Images/sprites.svg#${name}`} />
     </svg>
   );
