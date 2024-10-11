@@ -6,72 +6,23 @@
 @tailwind components;
 @tailwind utilities;
 
-.supremeLL-Black {
-  font-family: var(--font-supremeLLBlack);
-}
-
-.supremeLL-BlackItalic {
-  font-family: var(--font-supremeLLBlackItalic);
-}
-
 .supremeLL-Bold {
   font-family: var(--font-supremeLLBold);
-}
-
-.supremeLL-BoldFlat {
-  font-family: var(--font-supremeLLBoldFlat);
-}
-
-.supremeLL-BoldFlatItalic {
-  font-family: var(--font-supremeLLBoldFlatItalic);
 }
 
 .supremeLL-Book {
   font-family: var(--font-supremeLLBook);
 }
 
-.supremeLL-BookItalic {
-  font-family: var(--font-supremeLLBookItalic);
-}
-
-.supremeLL-Light {
-  font-family: var(--font-supremeLLLight);
-}
-
-.supremeLL-LightItalic {
-  font-family: var(--font-supremeLLLightItalic);
-}
-
-.supremeLL-Medium {
-  font-family: var(--font-supremeLLMedium);
-}
-
-.supremeLL-MediumItalic {
-  font-family: var(--font-supremeLLMediumItalic);
-}
-
-.supremeLL-Regular {
-  font-family: var(--font-supremeLLRegular);
-}
-
-.supremeLL-RegularItalic {
-  font-family: var(--font-supremeLLRegularItalic);
-}
-
-.supremeLL-Thin {
-  font-family: var(--font-supremeLLThin);
-}
-
-.supremeLL-ThinItalic {
-  font-family: var(--font-supremeLLThinItalic);
-}
-
-.supremeLLVIP-Choupette {
-  font-family: var(--font-supremeLLVIPChoupette);
-}
-
 body {
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.pizza {
+  font-family: var(--font-supremeLLBook);
+  letter-spacing: 0.05em;
+  font-size: 40px;
+  color: white;
 }
 
 h1 {
