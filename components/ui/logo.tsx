@@ -8,7 +8,7 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
   color?: string;
 }
 
-export function Icon({ name, color = "currentColor", className, ...props }: IconProps) {
+export function Logo({ name, color = "currentColor", className, ...props }: IconProps) {
   return (
     <svg 
       {...props} 
