@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 // import { Logo } from "@/components/ui/logo";
 import { StoryboardFrameComponent } from "@/components/storyboard-frame";
+import { StoryInput } from "@/components/story-input";
 
 export default function Home() { 
   return (
@@ -17,11 +18,12 @@ export default function Home() {
         </header>
         <section className="flex flex-col grow justify-start gap-2">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl leading-none text-white text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
-                <p className=" text-white text-center font-light font-inter text-[12px] leading-[1.2rem]">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
+                <h1 className="text-2xl leading-none text-black text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
+                <p className=" text-black text-center font-light font-inter text-[12px] leading-[1.2rem]">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
                 <Button className="hidden sm:text-2xl">Get your invitation</Button>
             </div>
-            <div className="flex justify-center">
+            <div className="flex flex-col gap-y-2 justify-center">
+                <StoryInput/>
                 <StoryboardFrameComponent/>
             </div>
         </section>
