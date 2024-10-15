@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 // import { Input } from "@/components/ui/input"
 // import { Textarea } from "@/components/ui/textarea"
 // import { Label } from "@/components/ui/label"
-import Image from 'next/image'
+// import Image from 'next/image'
 interface ShotDescription {
   type: string
   cameraMovement: string
@@ -61,6 +61,7 @@ const defaultProps: StoryboardFrameProps = {
   imageUrl: '/favicon.ico?height=300&width=400'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
   const [frameData, setFrameData] = useState<StoryboardFrameProps>({ ...defaultProps, ...props })
   // const [activeSection, setActiveSection] = useState<string>('shot')
