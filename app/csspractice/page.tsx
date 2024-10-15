@@ -8,7 +8,7 @@ import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 
 export default function Home() { 
   return (
-    <div className="flex flex-col gap-y-16 px-10 pt-8 min-h-screen justify-between">
+    <div className="flex flex-col gap-y-16 px-10 pt-8 min-h-screen justify-between bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] sm:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]">
         <header className="flex-row border border-black">
             <div className="rounded-md flex justify-between">
                 <div className="w-8 h-8 bg-white/10 rounded-sm .shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
@@ -17,9 +17,9 @@ export default function Home() {
                 <Button>Get your invitation</Button>
             </div>
         </header>        
-        <div className="flex grow border border-black justify-between">
-            <div className="border border-black flex flex-col gap-5 w-[38rem]">
-                <h1 className="border border-black text-left text-6xl tracking-tight">Your Creative Vision, Realized <br /> Instantly—With AI That Feels <br /> Like Magic</h1>
+        <div className="flex flex-col sm:flex-row lg:flex-row grow border border-black justify-between">
+            <div className="border border-black flex flex-col lg:flex-col gap-5 w-[38rem]">
+                <h1 className="border border-black text-left tracking-tight text-2xl lg:text-6xl">Your Creative Vision, Realized <br /> Instantly—With AI That Feels <br /> Like Magic</h1>
                 <p className="border border-black font-medium text-left leading-tight tracking-tight">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
                 <Button className="text-2xl">Get your invitation</Button>
             </div>

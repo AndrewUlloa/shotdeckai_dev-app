@@ -11,17 +11,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.pizza {
-  font-family: var(--font-supremeLLBook);
-  letter-spacing: 0.05em;
-  font-size: 40px;
-  color: white;
-}
 
 h1 {
   font-family: 'Instrument Serif', serif;
   line-height: 1.2;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.04em;
   color: white;
 }
 h1 {
@@ -32,12 +26,7 @@ h1 {
   }
 }
 
-p {
-  font-family: 'Inter', sans-serif;
-  line-height: 1.0;
-  font-size: 20px;
-  color: white;
-}
+
 
 /* p {
   @media screen and (min-width: 768px) {

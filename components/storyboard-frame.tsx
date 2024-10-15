@@ -148,16 +148,16 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
 
   return (
     <Card className="w-full max-w-3xl mx-auto frame-bg-effects-blur-light">
-      <CardContent className="space-y-4 p-5 ">
-        <div className="aspect-video w-full overflow-hidden border-white/50 bg-white/30 rounded-lg">
+      <CardContent className="p-[10px] ">
+        <div className="aspect-[4/3] w-full overflow-hidden border-white/50 bg-white/30 rounded-lg">
           <div className="relative w-full h-full">
-            {frameData.imageUrl ? (
+            {/* {frameData.imageUrl ? (
               <Image 
                 src={frameData.imageUrl}
                 alt={`Storyboard frame for Scene ${frameData.sceneNumber}, Shot ${frameData.shotNumber}`} 
                 className="w-full h-full object-cover"
                 width={300}
-                height={255}
+                height={225}
                 priority
               />
             ) : (
@@ -166,14 +166,14 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                   <Image 
                     src="/favicon.ico"
                     alt="No image available"
-                    className="w-10 h-10 mb-2"
+                    className="w-2 h-2"
                     width={32}
                     height={32}
                   />
                   No image available
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
     
