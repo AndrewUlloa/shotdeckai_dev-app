@@ -6,6 +6,8 @@ import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 // import { ArrowUp } from "lucide-react";
 // import { body, div } from "framer-motion/client";
 
+
+
 export default function Home() { 
   return (
     <div className="flex flex-col gap-y-16 px-10 pt-8 min-h-screen justify-between bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] sm:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]">

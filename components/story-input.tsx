@@ -1,51 +1,51 @@
 'use client'
 
-// import { ArrowUp } from "lucide-react"
-// import { Button } from "@/components/ui/button"
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useDebounce } from 'use-debounce';
+interface StoryInputProps {
+  onImageGenerated: (imageUrl: string) => void;
+}
 
-export function StoryInput() {
+export function StoryInput({ onImageGenerated }: StoryInputProps) {
+  const [prompt, setPrompt] = useState('');
+  const [debouncedPrompt] = useDebounce(prompt, 250);
+
+  const { isLoading, error } = useQuery({
+    queryKey: [debouncedPrompt],
+    queryFn: async () => {
+      if (!debouncedPrompt.trim()) return null;
+      const res = await fetch('/api/generateImage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: debouncedPrompt }),
+      });
+      const json = await res.json();
+      onImageGenerated(json.url);
+      return json;
+    },
+    enabled: !!debouncedPrompt.trim(),
+    staleTime: Infinity,
+    retry: false,
+  });
+
   return (
-    // <div className="flex h-9 w-full rounded-2xl border-white/10 border-gradient-lg backdrop-blur-[10px] text-card-foreground shadow px-3 py-1 text-sm transition-colors">
-    //   <input
-    //     type="text"
-    //     placeholder="My story looks and feels like..."
-    //     className="bg-transparent text-white placeholder-white text-sm flex-grow outline-none px-1 py-1"
-    //     inputMode="text"
-    //     autoComplete="off"
-    //     spellCheck="false"
-    //   />
-    // </div>
     <div className="w-full max-w-lg mx-auto rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg">
       <textarea
-        className="flex w-full rounded-2xl px-3 py-1 placeholder:text-white text-white text-base font-inter bg-transparent"
+        className="flex w-full rounded-2xl px-3 py-1 placeholder:text-white text-white text-base font-inter bg-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
         rows={2}
         spellCheck="false"
         placeholder="My story looks and feels like..."
         required
         inputMode="text"
         autoComplete="off"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
       />
+      {isLoading && <p className="text-white mt-2">Generating image...</p>}
+      {error && <p className="text-red-500 mt-2">Error generating image. Please try again.</p>}
     </div>
   )
 }
-// 'use client'
-
-// export function StoryInput() {
-//   return (
-//     <div className="w-full max-w-lg mx-auto">
-//       <textarea 
-//         className="flex min-h-[60px] w-full rounded-md border border-white/10 py-2 px-4 shadow-sm 
-//                    placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-1 
-//                    focus-visible:ring-white/30 disabled:cursor-not-allowed disabled:opacity-50 
-//                    resize-none bg-transparent text-white text-base transition-colors
-//                    backdrop-blur-[10px]"
-//         rows={4}
-//         spellCheck="false"
-//         placeholder="My story looks and feels like..."
-//         required
-//         inputMode="text"
-//         autoComplete="off"
-//       />
-//     </div>
-//   )
-// }
