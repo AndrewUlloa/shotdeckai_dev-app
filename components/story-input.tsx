@@ -9,7 +9,7 @@ interface StoryInputProps {
 
 export function StoryInput({ onImageGenerated }: StoryInputProps) {
   const [prompt, setPrompt] = useState('');
-  const [debouncedPrompt] = useDebounce(prompt, 200);
+  const [debouncedPrompt] = useDebounce(prompt, 300);
   const { isLoading, error } = useQuery({
     queryKey: [debouncedPrompt],
     queryFn: async () => {

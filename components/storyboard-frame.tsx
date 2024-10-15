@@ -12,7 +12,9 @@ export function StoryboardFrameComponent({ imageUrls }: StoryboardFrameProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    setCurrentImageIndex(imageUrls.length - 1);
+    if (imageUrls.length > 0) {
+      setCurrentImageIndex(imageUrls.length - 1);
+    }
   }, [imageUrls]);
 
   return (
@@ -24,8 +26,8 @@ export function StoryboardFrameComponent({ imageUrls }: StoryboardFrameProps) {
               <Image 
                 src={imageUrls[currentImageIndex]}
                 alt={`Generated storyboard frame ${currentImageIndex + 1}`}
-                layout="fill"
-                objectFit="cover"
+                fill
+                style={{ objectFit: "cover" }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-white/30">

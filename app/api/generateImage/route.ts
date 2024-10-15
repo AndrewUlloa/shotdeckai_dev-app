@@ -4,11 +4,19 @@ fal.config({
   credentials: process.env.FAL_KEY,
 });
 
+interface ImageGenerationResult {
+  images?: Array<{ url: string }>;
+}
+
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
 
     console.log("Received request:", { prompt });
+
+    if (!prompt) {
+      return Response.json({ error: "Prompt is required" }, { status: 400 });
+    }
 
     const result = await fal.subscribe("fal-ai/flux/schnell", {
       input: {
@@ -25,21 +33,24 @@ export async function POST(req: Request) {
           update.logs.forEach((log) => console.log(log.message));
         }
       },
-    });
+    }) as ImageGenerationResult;
 
-    console.log("API call successful:", result);
+    console.log("API call result:", JSON.stringify(result, null, 2));
 
-    if (result?.images?.[0]?.url) {
-      return Response.json({ url: result.images[0].url });
+    const imageUrl = result.images?.[0]?.url;
+    if (imageUrl) {
+      return Response.json({ url: imageUrl });
     } else {
-      throw new Error("Unexpected API response structure");
+      console.error("Unexpected API response structure:", result);
+      return Response.json({ error: "Unexpected API response structure" }, { status: 500 });
     }
   } catch (error) {
     console.error("Error in generateImage:", error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    let errorMessage = "An unexpected error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return Response.json({ error: errorMessage }, { status: 500 });
   }
 }
 
