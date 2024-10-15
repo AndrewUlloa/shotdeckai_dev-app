@@ -14,7 +14,6 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-
 // SupremeLL-Book
 const supremeLLBook = localFont({
   src: './fonts/SupremeLL-Book.otf',
@@ -52,7 +51,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.className} ${supremeLLBold.className} w-fulloverflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
+        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} w-fulloverflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
       >
         <Providers>{children}</Providers>
       </body>

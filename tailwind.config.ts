@@ -84,7 +84,8 @@ const config: Config = {
     },
     fontFamily: {
       'inter': ['Inter', 'sans-serif'],
-      'supremeLL': ['supremeLL', 'sans-serif'],
+      'supremeLLBook': ['var(--font-supremeLLBook)', 'sans-serif'],
+      'supremeLLBold': ['var(--font-supremeLLBold)', 'sans-serif'],
     }
   },
   plugins: [
@@ -135,7 +136,7 @@ const config: Config = {
         }
       };
       addUtilities(newUtilities);
-    }
+    },
   ],
 };
 export default config;
