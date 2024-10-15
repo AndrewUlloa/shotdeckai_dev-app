@@ -13,7 +13,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 export default function Home() { 
-  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
+
+  const handleImageGenerated = (url: string) => {
+    setGeneratedImageUrls(prev => [...prev, url]);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -30,8 +34,8 @@ export default function Home() {
             <div className="flex flex-col gap-2">
                 <h1 className="text-2xl leading-none text-white font-bold text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
                 <Button className="hidden sm:text-2xl">Get your invitation</Button>
-                <StoryInput onImageGenerated={setGeneratedImageUrl} />
-                <StoryboardFrameComponent imageUrl={generatedImageUrl} />
+                <StoryInput onImageGenerated={handleImageGenerated} />
+                <StoryboardFrameComponent imageUrls={generatedImageUrls} />
                 <p className=" text-white text-center font-light font-inter text-[12px] leading-[1.2rem]">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
             </div>
             <div className="flex flex-col gap-y-2 justify-center">

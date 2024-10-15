@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       input: {
         prompt: "A storyboard frame of a story about " + prompt,
         image_size: "landscape_4_3",
-        num_inference_steps: 3,
+        num_inference_steps: 2,
         enable_safety_checker: true,
         num_images: 1,
         seed: 42,
