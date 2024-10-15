@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+// import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 // import { ScrollArea } from "@/components/ui/scroll-area"
 // import { motion, AnimatePresence } from "framer-motion"
@@ -9,61 +9,60 @@ import { Card, CardContent } from "@/components/ui/card"
 // import { Textarea } from "@/components/ui/textarea"
 // import { Label } from "@/components/ui/label"
 // import Image from 'next/image'
-interface ShotDescription {
-  type: string
-  cameraMovement: string
-  angle: string
-}
+// interface ShotDescription {
+//   type: string
+//   cameraMovement: string
+//   angle: string
+// }
 
-interface StoryboardFrameProps {
-  sceneNumber: number
-  shotNumber: number
-  shotDescription: ShotDescription
-  actionDescription: string
-  dialogue: string
-  soundEffects: string
-  music: string
-  lighting: string
-  mood: string
-  composition: string
-  specialEffects: string
-  timing: string
-  characterNotes: string
-  environmentNotes: string
-  costumeAndProps: string
-  cinematographicStyle: string
-  postProductionNotes: string
-  imageUrl: string
-}
+// interface StoryboardFrameProps {
+//   sceneNumber: number
+//   shotNumber: number
+//   shotDescription: ShotDescription
+//   actionDescription: string
+//   dialogue: string
+//   soundEffects: string
+//   music: string
+//   lighting: string
+//   mood: string
+//   composition: string
+//   specialEffects: string
+//   timing: string
+//   characterNotes: string
+//   environmentNotes: string
+//   costumeAndProps: string
+//   cinematographicStyle: string
+//   postProductionNotes: string
+//   imageUrl: string
+// }
 
-const defaultProps: StoryboardFrameProps = {
-  sceneNumber: 1,
-  shotNumber: 1,
-  shotDescription: {
-    type: 'Not specified',
-    cameraMovement: 'Not specified',
-    angle: 'Not specified'
-  },
-  actionDescription: 'Not specified',
-  dialogue: 'Not specified',
-  soundEffects: 'Not specified',
-  music: 'Not specified',
-  lighting: 'Not specified',
-  mood: 'Not specified',
-  composition: 'Not specified',
-  specialEffects: 'Not specified',
-  timing: 'Not specified',
-  characterNotes: 'Not specified',
-  environmentNotes: 'Not specified',
-  costumeAndProps: 'Not specified',
-  cinematographicStyle: 'Not specified',
-  postProductionNotes: 'Not specified',
-  imageUrl: '/favicon.ico?height=300&width=400'
-}
+// const defaultProps: StoryboardFrameProps = {
+//   sceneNumber: 1,
+//   shotNumber: 1,
+//   shotDescription: {
+//     type: 'Not specified',
+//     cameraMovement: 'Not specified',
+//     angle: 'Not specified'
+//   },
+//   actionDescription: 'Not specified',
+//   dialogue: 'Not specified',
+//   soundEffects: 'Not specified',
+//   music: 'Not specified',
+//   lighting: 'Not specified',
+//   mood: 'Not specified',
+//   composition: 'Not specified',
+//   specialEffects: 'Not specified',
+//   timing: 'Not specified',
+//   characterNotes: 'Not specified',
+//   environmentNotes: 'Not specified',
+//   costumeAndProps: 'Not specified',
+//   cinematographicStyle: 'Not specified',
+//   postProductionNotes: 'Not specified',
+//   imageUrl: '/favicon.ico?height=300&width=400'
+// }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
-  const [frameData, setFrameData] = useState<StoryboardFrameProps>({ ...defaultProps, ...props })
+export function StoryboardFrameComponent() {
+  // const [frameData, setFrameData] = useState<StoryboardFrameProps>({ ...defaultProps, ...props })
   // const [activeSection, setActiveSection] = useState<string>('shot')
   // const [isOpen, setIsOpen] = useState(false)
   // const [direction, setDirection] = useState(0)
@@ -95,16 +94,16 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
   // }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleShotDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFrameData(prev => ({
-      ...prev,
-      shotDescription: {
-        ...prev.shotDescription,
-        [name]: value
-      }
-    }))
-  }
+  // const handleShotDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target
+  //   setFrameData(prev => ({
+  //     ...prev,
+  //     shotDescription: {
+  //       ...prev.shotDescription,
+  //       [name]: value
+  //     }
+  //   }))
+  // }
 
   // const variants = {
   //   enter: (direction: number) => ({
@@ -177,9 +176,12 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
             )} */}
           </div>
         </div>
-    
+      </CardContent>
+    </Card>
+  )
+}  
         
-        {/* <div className="space-y-3">
+        /* <div className="space-y-3">
           <div className="flex rounded-lg overflow-hidden border bg-white/20 border-white/50">
             {menuItems.map((item) => (
               <button
@@ -197,9 +199,9 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
                 }`} />
               </button>
             ))}
-          </div> */}
+          </div> */
 
-        {/* <AnimatePresence initial={false} custom={direction}>
+        /* <AnimatePresence initial={false} custom={direction}>
           {isOpen && (
             <motion.div
               key="content"
@@ -232,8 +234,9 @@ export function StoryboardFrameComponent(props: Partial<StoryboardFrameProps>) {
               </div>
             </motion.div>
           )}
-        </AnimatePresence> */}
+        </AnimatePresence>
       </CardContent>
     </Card>
   )
-}
+}   */
+
