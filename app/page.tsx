@@ -4,7 +4,7 @@ import Image from "next/image";
 // import Link from "next/link";
 import { Button } from "@/components/ui/button";
 // import { Logo } from "@/components/ui/logo";
-import { StoryboardFrameComponent } from "@/components/storyboard-frame";
+// import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 import { StoryInput } from "@/components/story-input";
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -36,7 +36,7 @@ export default function Home() {
                 <h1 className="text-2xl leading-none text-white font-bold text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
                 <Button className="hidden sm:text-2xl lg:text-2xl">Get your invitation</Button>
                 <StoryInput onImageGenerated={handleImageGenerated} />
-                <StoryboardFrameComponent imageUrls={generatedImageUrls} />
+                {/* <StoryboardFrameComponent imageUrls={generatedImageUrls} /> */}
                 <p className=" text-white text-center font-light font-inter text-[12px] leading-[1.2rem] lg:text-2xl">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
             </div>
             <div className="flex flex-col gap-y-2 justify-center">

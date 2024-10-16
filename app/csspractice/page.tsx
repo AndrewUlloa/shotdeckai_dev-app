@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { StoryboardFrameComponent } from "@/components/storyboard-frame";
+// import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 // import { ArrowUp } from "lucide-react";
 // import { body, div } from "framer-motion/client";
 
@@ -26,7 +26,7 @@ export default function Home() {
                 <Button className="text-2xl">Get your invitation</Button>
             </div>
             <div className="border border-black flex flex-col w-96">
-                <StoryboardFrameComponent/>
+                {/* <StoryboardFrameComponent/> */}
             </div>
         </div>
         <footer className="border border-black border-t-2 flex items-center flex-col sm:flex-row justify-between py-5">
