@@ -8,6 +8,7 @@ import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 import { StoryInput } from "@/components/story-input";
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import PrelaunchSignup from "@/components/prelaunch-signup";
 
 
 const queryClient = new QueryClient()
@@ -27,16 +28,16 @@ export default function Home() {
                 <div className="w-8 h-8 bg-white/10 rounded-sm .shadow shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
                     <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
                 </div>
-                <Button>Get your invitation</Button>
+                <PrelaunchSignup />
             </div>
         </header>
         <section className="flex flex-col grow justify-start gap-2">
             <div className="flex flex-col gap-2">
                 <h1 className="text-2xl leading-none text-white font-bold text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
-                <Button className="hidden sm:text-2xl">Get your invitation</Button>
+                <Button className="hidden sm:text-2xl lg:text-2xl">Get your invitation</Button>
                 <StoryInput onImageGenerated={handleImageGenerated} />
                 <StoryboardFrameComponent imageUrls={generatedImageUrls} />
-                <p className=" text-white text-center font-light font-inter text-[12px] leading-[1.2rem]">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
+                <p className=" text-white text-center font-light font-inter text-[12px] leading-[1.2rem] lg:text-2xl">Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.</p>
             </div>
             <div className="flex flex-col gap-y-2 justify-center">
             </div>

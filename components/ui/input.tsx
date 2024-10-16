@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ButtonIcon } from "./input-button"
+// import { ButtonIcon } from "./input-button"
 
 import { cn } from "@/lib/utils"
 
@@ -23,7 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         {...props}
         />
-        <ButtonIcon />
+        {/* <ButtonIcon /> */}
       </div>
     )
   }
