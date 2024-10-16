@@ -59,56 +59,59 @@ export default function PrelaunchSignup() {
       </Button>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md m-4">
-            <h4 className="text-lg font-medium mb-2">Get Early Access</h4>
-            <p className="text-sm text-gray-600 mb-4">
-              Sign up to be notified when we launch.
-            </p>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    placeholder="name@example.com"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+          <div className="flex flex-col items-center p-2 bg-white/30 border-gradient-lg rounded-lg ">
+            <div className="bg-white rounded-lg p-6 w-full ">
+              <h4 className="text-lg font-medium mb-2">Get Early Access</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  Sign up to be notified when we launch.
+                </p>
+                <form onSubmit={handleSubmit}>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        placeholder="name@example.com"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
 
-                  />
-                </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    className=" hover:bg-gray-50"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitted || isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 animate-spin" /> Submitting...
-                      </>
-                    ) : isSubmitted ? (
-                      <>
-                        <Check className="mr-2" /> Submitted
-                      </>
-                    ) : (
-                      'Sign Up'
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </form>
+                      />
+                    </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        onClick={() => setIsOpen(false)}
+                        className=" hover:bg-gray-50"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitted || isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 animate-spin" /> Submitting...
+                          </>
+                        ) : isSubmitted ? (
+                          <>
+                            <Check className="mr-2" /> Submitted
+                          </>
+                        ) : (
+                          'Sign Up'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+            </div>
           </div>
+            
         </div>
       )}
     </>
