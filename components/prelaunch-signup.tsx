@@ -51,6 +51,12 @@ export default function PrelaunchSignup() {
     }
   }
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsOpen(false)
+    }
+  }
+
   return (
     <>
       <Button className="hidden sm:block" onClick={() => setIsOpen(true)}>
@@ -60,10 +66,13 @@ export default function PrelaunchSignup() {
         Get invited
       </Button>
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={handleOverlayClick}
+        >
           <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-2xl">
             <div className="linear-gradient-popover rounded-xl flex flex-col justify-between gap-10 py-4 px-6 w-full">
-              <LogoWithText />
+              <LogoWithText variant="small"/>
                 <div className="flex flex-col gap-3 ">
                   <h2 className="text-xl font-inter font-medium tracking-wide text-center">Get Early Access</h2>
                   <p className="text-sm font-inter font-light tracking-wide text-center">
