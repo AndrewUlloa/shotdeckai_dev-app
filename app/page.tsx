@@ -33,7 +33,7 @@ export default function Home() {
         </header>
         <section className="flex flex-col grow justify-start gap-2">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl leading-none text-white font-bold text-center">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden" /> Instantly—With AI That Feels Like Magic</h1>
+                <h1 className="text-2xl leading-none text-white font-bold text-center lg:text-7xl">Your Creative Vision, Realized <br className="sm:hidden md:hidden lg:block xl:block 2xl:block" /> Instantly—With AI That Feels Like Magic</h1>
                 <Button className="hidden sm:text-2xl lg:text-2xl">Get your invitation</Button>
                 <StoryInput onImageGenerated={handleImageGenerated} />
                 {/* <StoryboardFrameComponent imageUrls={generatedImageUrls} /> */}
