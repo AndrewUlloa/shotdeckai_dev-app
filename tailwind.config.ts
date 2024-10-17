@@ -137,7 +137,8 @@ const config: Config = {
           'box-shadow': 'inset 5px 5px 60px 0px #171D0020',
         },
         '.linear-gradient-popover': {
-          'background': 'linear-gradient(to bottom, white, #ebedec 66%, #dfe4f2 90%)',
+          'background': 'linear-gradient(white 0%, #ebedec 66%, #dfe4f2 90%)',
+          'border-radius': 'inherit',
         },
         '.input-shadow': {
           'box-shadow': '0px 2.5px 10px 0px #00000020)',
