@@ -12,6 +12,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        white: '#FFFFFF',
+        black: '#000000',
+        offwhite: '#EBEDEC',
+        bluegray: '#DFE4F2',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -57,6 +61,8 @@ const config: Config = {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        'outer-signup': '16px',
+        'inner-signup': '12px',
         'button': '17px',
       },
       boxShadow: {
@@ -88,6 +94,13 @@ const config: Config = {
       'inter': ['Inter', 'sans-serif'],
       'supremeLLBook': ['var(--font-supremeLLBook)', 'sans-serif'],
       'supremeLLBold': ['var(--font-supremeLLBold)', 'sans-serif'],
+      'eudoxusExtraLight': ['var(--font-eudoxusExtraLight)', 'sans-serif'],
+      'eudoxusLight': ['var(--font-eudoxusLight)', 'sans-serif'],
+      'eudoxusRegular': ['var(--font-eudoxusRegular)', 'sans-serif'],
+      'eudoxusMedium': ['var(--font-eudoxusMedium)', 'sans-serif'],
+      'eudoxusBold': ['var(--font-eudoxusBold)', 'sans-serif'],
+      'eudoxusExtraBold': ['var(--font-eudoxusExtraBold)', 'sans-serif'],
+
     }
   },
   plugins: [
@@ -123,6 +136,21 @@ const config: Config = {
             'pointer-events': 'none',
           },
         },
+        '.border-gradient-signup': {
+          'position': 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: '-1px',
+            padding: '1px', // Adjust this value to change border thickness
+            borderRadius: 'inherit',
+            background: '#FFFFFF50',
+            '-webkit-mask': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            '-webkit-mask-composite': 'xor',
+            'mask-composite': 'exclude',
+            'pointer-events': 'none',
+          },
+        },
         '.frame-bg-effects-blur-light': {
           'background-filter': 'blur(10px)',
           'box-shadow': '0px 5px 15px 0px #00000025',
@@ -137,8 +165,7 @@ const config: Config = {
           'box-shadow': 'inset 5px 5px 60px 0px #171D0020',
         },
         '.linear-gradient-popover': {
-          'background': 'linear-gradient(white 0%, #ebedec 66%, #dfe4f2 90%)',
-          'border-radius': 'inherit',
+          background: 'bg-gradient-to-b from white from-0% to-#ebedec to-66% to-#dfe4f2 to-90%',
         },
         '.input-shadow': {
           'box-shadow': '0px 2.5px 10px 0px #00000020)',

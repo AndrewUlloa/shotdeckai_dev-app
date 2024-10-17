@@ -72,18 +72,19 @@ export default function PrelaunchSignup() {
           className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={handleOverlayClick}
         >
-          <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-2xl">
-            <div className="linear-gradient-popover border border-white/50 bgrounded-xl flex flex-col justify-between gap-6 py-6 px-6 w-full">
+          <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-outer-signup">
+            <div className="flex flex-col bg-gradient-to-b from-white from-0% via-offwhite via-66% to-bluegray to-90%
+            border border-gradient-signup rounded-inner-signup justify-between gap-6 py-6 px-6">
               <IconButton className="w-4 h-4" onClick={() => setIsOpen(false)}><X/></IconButton>
               <LogoWithText variant="small"/>
                 <div className="flex flex-col gap-3 ">
-                  <h2 className="text-xl font-inter font-medium tracking-wide text-center">Get Early Access</h2>
-                  <p className="text-sm font-inter font-light tracking-wide text-center">
+                  <h2 className="text-xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center">Get Early Access</h2>
+                  <p className="text-sm font-eudoxusLight font-light tracking-[-0.019rem] text-center">
                     Sign up to be notified when we launch!
                   </p>
                 </div>
                 <form onSubmit={handleSubmit}>
-                  <div className="input-shadow">
+                  <div>
                     <div className="flex flex-row border-2 border-DFE4F2 py-2 pl-4 pr-2 justify-between bg-white rounded-full frame-bg-effects-blur-light">
                       <Input className="flex flex-grow shadow-none placeholder:text-#A1A1A1"
                         id="email"
