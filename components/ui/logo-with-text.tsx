@@ -31,7 +31,7 @@ export function LogoWithText({ variant = "default" }: LogoWithTextProps) {
                 />
                 <h3 className={cn(
                     textSize,
-                    "text-black font-supremeLLBold tracking-[-0.08em]"
+                    "text-black font-supremeLLBold leading-[1.2rem] tracking-[-0.08em]"
                 )}>
                     ShotDeckAI
                 </h3>
