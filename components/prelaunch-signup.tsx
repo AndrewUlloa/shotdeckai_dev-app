@@ -4,8 +4,10 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Check, Loader2 } from "lucide-react"
+import { ArrowUpIcon } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+import { LogoWithText } from "@/components/ui/logo-with-text"
 
 export default function PrelaunchSignup() {
   const [isOpen, setIsOpen] = useState(false)
@@ -59,53 +61,53 @@ export default function PrelaunchSignup() {
       </Button>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="flex flex-col items-center p-2 bg-white/30 border-gradient-lg rounded-lg ">
-            <div className="bg-white rounded-lg p-6 w-full ">
-              <h4 className="text-lg font-medium mb-2">Get Early Access</h4>
-                <p className="text-sm text-gray-600 mb-4">
-                  Sign up to be notified when we launch.
-                </p>
+          <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-2xl">
+            <div className="linear-gradient-popover rounded-xl flex flex-col justify-between gap-10 py-4 px-6 w-full">
+              <LogoWithText />
+                <div className="flex flex-col gap-3 ">
+                  <h2 className="text-xl font-inter font-medium tracking-wide text-center">Get Early Access</h2>
+                  <p className="text-sm font-inter font-light tracking-wide text-center">
+                    Sign up to be notified when we launch!
+                  </p>
+                </div>
                 <form onSubmit={handleSubmit}>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email
-                      </Label>
-                      <Input
+                  <div className="input-shadow">
+                    <div className="flex flex-row border-2 border-#E6DCF2 py-2 pl-4 pr-2 justify-between bg-white rounded-full input-shadow">
+                      <Input className="flex flex-grow shadow-none placeholder:text-#A1A1A1"
                         id="email"
-                        placeholder="name@example.com"
+                        placeholder="Enter your email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange ={(e) => setEmail(e.target.value)}
                         required
-
-                      />
-                    </div>
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        type="button"
-                        onClick={() => setIsOpen(false)}
-                        className=" hover:bg-gray-50"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
+                        /> 
+                        <IconButton
                         type="submit"
                         disabled={isSubmitted || isLoading}
                       >
                         {isLoading ? (
                           <>
-                            <Loader2 className="mr-2 animate-spin" /> Submitting...
+                            <Loader2 className="animate-spin" />
                           </>
                         ) : isSubmitted ? (
                           <>
-                            <Check className="mr-2" /> Submitted
+                            <Check /> 
                           </>
                         ) : (
-                          'Sign Up'
+                          <ArrowUpIcon/>
                         )}
-                      </Button>
+                      </IconButton>
+                    </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    <div className="flex justify-end space-x-2">
+                      {/* <Button
+                        type="button"
+                        onClick={() => setIsOpen(false)}
+                        className=" hover:bg-gray-50"
+                      >
+                        Cancel
+                      </Button> */}
+                     
                     </div>
                   </div>
                 </form>
