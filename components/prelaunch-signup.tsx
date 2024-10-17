@@ -8,6 +8,8 @@ import { Check, Loader2 } from "lucide-react"
 import { ArrowUpIcon } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 import { LogoWithText } from "@/components/ui/logo-with-text"
+import { X } from "lucide-react"
+
 
 export default function PrelaunchSignup() {
   const [isOpen, setIsOpen] = useState(false)
@@ -71,7 +73,8 @@ export default function PrelaunchSignup() {
           onClick={handleOverlayClick}
         >
           <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-2xl">
-            <div className="linear-gradient-popover rounded-xl flex flex-col justify-between gap-10 py-4 px-6 w-full">
+            <div className="linear-gradient-popover rounded-xl flex flex-col justify-between gap-6 py-6 px-6 w-full">
+              <IconButton className="w-4 h-4" onClick={() => setIsOpen(false)}><X/></IconButton>
               <LogoWithText variant="small"/>
                 <div className="flex flex-col gap-3 ">
                   <h2 className="text-xl font-inter font-medium tracking-wide text-center">Get Early Access</h2>
