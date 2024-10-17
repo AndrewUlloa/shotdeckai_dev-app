@@ -69,61 +69,66 @@ export default function PrelaunchSignup() {
       </Button>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 lg:backdrop-blur-sm"
           onClick={handleOverlayClick}
         >
-          <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-outer-signup">
+          <div className="flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-outer-signup lg:p-2">
             <div className="flex flex-col bg-gradient-to-b from-white from-0% via-offwhite via-66% to-bluegray to-90%
-            border border-gradient-signup rounded-inner-signup justify-between gap-6 py-6 px-6">
+            border-gradient-signup rounded-inner-signup justify-between gap-6 py-6 px-6 lg:gap-8 lg:p-12">
               <IconButton className="w-4 h-4" onClick={() => setIsOpen(false)}><X/></IconButton>
-              <LogoWithText variant="small"/>
-                <div className="flex flex-col gap-3 ">
-                  <h2 className="text-xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center">Get Early Access</h2>
-                  <p className="text-sm font-eudoxusLight font-light tracking-[-0.019rem] text-center">
-                    Sign up to be notified when we launch!
-                  </p>
-                </div>
-                <form onSubmit={handleSubmit}>
-                  <div>
-                    <div className="flex flex-row border-2 border-DFE4F2 py-2 pl-4 pr-2 justify-between bg-white rounded-full frame-bg-effects-blur-light">
-                      <Input className="flex flex-grow shadow-none placeholder:text-#A1A1A1"
-                        id="email"
-                        placeholder="Enter your email"
-                        type="email"
-                        value={email}
-                        onChange ={(e) => setEmail(e.target.value)}
-                        required
-                        /> 
-                        <IconButton
-                        type="submit"
-                        disabled={isSubmitted || isLoading}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="animate-spin" />
-                          </>
-                        ) : isSubmitted ? (
-                          <>
-                            <Check /> 
-                          </>
-                        ) : (
-                          <ArrowUpIcon/>
-                        )}
-                      </IconButton>
-                    </div>
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <div className="flex justify-end space-x-2">
-                      {/* <Button
-                        type="button"
-                        onClick={() => setIsOpen(false)}
-                        className=" hover:bg-gray-50"
-                      >
-                        Cancel
-                      </Button> */}
-                     
-                    </div>
+              <div className="lg:hidden">
+                <LogoWithText variant="small" />
+              </div>
+              <div className="hidden lg:block">
+                <LogoWithText variant="large" />
+              </div>
+              <div className="flex flex-col gap-3 ">
+                <h2 className="text-xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center lg:text-2xl">Get Early Access</h2>
+                <p className="text-sm font-eudoxusLight tracking-[-0.019rem] text-center lg:text-lg">
+                  Sign up to be notified when we launch!
+                </p>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div>
+                  <div className="flex flex-row border-2 border-DFE4F2 py-2 pl-4 pr-2 justify-between bg-white rounded-full frame-bg-effects-blur-light">
+                    <Input className="flex flex-grow shadow-none leading-tight font-eudoxusLight placeholder:text-#A1A1A1 lg:min-w-80 text-xl "
+                      id="email"
+                      placeholder="Enter your email"
+                      type="email"
+                      value={email}
+                      onChange ={(e) => setEmail(e.target.value)}
+                      required
+                      /> 
+                      <IconButton
+                      type="submit"
+                      disabled={isSubmitted || isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin" />
+                        </>
+                      ) : isSubmitted ? (
+                        <>
+                          <Check /> 
+                        </>
+                      ) : (
+                        <ArrowUpIcon/>
+                      )}
+                    </IconButton>
                   </div>
-                </form>
+                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                  <div className="flex justify-end space-x-2">
+                    {/* <Button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className=" hover:bg-gray-50"
+                    >
+                      Cancel
+                    </Button> */}
+                   
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
             

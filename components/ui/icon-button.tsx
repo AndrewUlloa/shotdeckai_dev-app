@@ -31,10 +31,15 @@ const buttonVariants = cva(
         icon: "h-8 w-8",
         input: "h-6 w-6",
       },
+      shadow: {
+        default: "",
+        none: "shadow-none",
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      shadow: "default",
     },
   }
 )

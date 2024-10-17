@@ -27,7 +27,7 @@ export function LogoWithText({ variant = "default" }: LogoWithTextProps) {
                     alt="Logo"
                     width={logoSize.width}
                     height={logoSize.height}
-                    className="rounded-[2px] mr-2"
+                    className="rounded-[2px] mr-2 lg:rounded-sm mr-[10px]"
                 />
                 <h3 className={cn(
                     textSize,

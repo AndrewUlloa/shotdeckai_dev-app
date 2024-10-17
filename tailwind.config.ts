@@ -141,7 +141,7 @@ const config: Config = {
           '&::before': {
             content: '""',
             position: 'absolute',
-            inset: '-1px',
+            inset: '0px',
             padding: '1px', // Adjust this value to change border thickness
             borderRadius: 'inherit',
             background: '#FFFFFF50',
