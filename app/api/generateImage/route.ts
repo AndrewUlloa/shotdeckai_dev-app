@@ -50,7 +50,7 @@ export async function POST(req: Request) {
           ]
         }`,
         image_size: "landscape_4_3",
-        num_inference_steps: 2,
+        num_inference_steps: 8,
         enable_safety_checker: true,
         num_images: 1,
         seed: 42,

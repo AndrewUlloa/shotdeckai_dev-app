@@ -36,7 +36,7 @@ export default function Home() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-cover bg-[center_0%] md:bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/a701b66d-1710-44f9-04d9-233485c41300/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/3c02e6e1-8388-485a-c344-2e99de2fb900/public')]">
+      <div className="flex flex-col min-h-screen bg-cover bg-[center_0%] dark:bg-[center_2px] bg-no-repeat md:bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/e6ce4042-c3dc-42e7-9786-2dc9f482cb00/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/3c02e6e1-8388-485a-c344-2e99de2fb900/public')] transition-all duration-300 ease-in">
         {/* Mobile Layout (up to 768px) */}
         <div className="md:hidden flex flex-col min-h-screen p-4 gap-5 items-center">
           {/* Mobile Header - Top Bar */}
@@ -48,9 +48,6 @@ export default function Home() {
             {/* Right Nav Bar */}
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <div className="mobile-header-button">
-                <PrelaunchSignup />
-              </div>
             </div>
           </header>
 
@@ -81,46 +78,54 @@ export default function Home() {
 
           {/* Mobile Footer */}
           <footer className="flex flex-col items-center pt-4 gap-5 w-full">
-            {/* Footer component */}
-            <div className="flex flex-row justify-center items-center gap-3.5 w-full">
-              {/* Logo Container */}
-              <div className="flex flex-row justify-center items-end gap-2.5">
-                <div className="h-8 w-8 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] bg-white/10 border border-white/50 flex items-center justify-center">
-                  <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
+            {/* Container with button and footer component */}
+            <div className="flex flex-col items-center pt-4 gap-5 w-full max-w-[376px] h-[100px]">
+              {/* Get your invitation button */}
+              <div className="flex flex-row items-center justify-center w-[163px] h-8 order-0">
+                <div className="mobile-header-button">
+                  <PrelaunchSignup />
                 </div>
-                <span className="text-white text-2xl font-supremeLLBold tracking-[-0.08em] leading-8">ShotDeckAI</span>
               </div>
+              
+              {/* Footer component */}
+              <div className="flex flex-row justify-center items-center gap-3.5 w-full order-1">
+                {/* Logo Container */}
+                <div className="flex flex-row justify-center items-end gap-2.5">
+                  <div className="h-8 w-8 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] bg-white/10 border border-white/50 flex items-center justify-center">
+                    <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
+                  </div>
+                  <span className="text-white text-2xl font-supremeLLBold tracking-[-0.08em] leading-8">ShotDeckAI</span>
+                </div>
 
-              {/* Social Media Container */}
-              <div className="flex flex-row justify-center items-center gap-5">
-                {[
-                  { name: 'tiktok', file: 'tiktok-icon.png', url: 'https://tiktok.com/@shotdeckai' },
-                  { name: 'instagram', file: 'instagram-icon.png', url: 'https://instagram.com/shotdeckai' },
-                  { name: 'facebook', file: 'facebook-icon.png', url: 'https://facebook.com/shotdeckai' },
-                  { name: 'twitter', file: 'twitter-icon.png', url: 'https://twitter.com/shotdeckai' },
-                  { name: 'linkedin', file: 'linkedin-icon.png', url: 'https://linkedin.com/company/shotdeckai' }
-                ].map((social) => (
-                  <Link 
-                    key={social.name} 
-                    href={social.url} 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${social.name} link`} 
-                    className="w-5 h-5 p-1 bg-white/10 rounded shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] flex items-center justify-center hover:bg-white/20 transition-colors"
-                  >
-                    <Image 
-                      src={`/Images/${social.file}`} 
-                      alt={social.name} 
-                      width={16} 
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </Link>
-                ))}
+                {/* Social Media Container */}
+                <div className="flex flex-row justify-center items-center gap-5">
+                  {[
+                    { name: 'tiktok', file: 'tiktok-icon.png', url: 'https://tiktok.com/@shotdeckai' },
+                    { name: 'instagram', file: 'instagram-icon.png', url: 'https://instagram.com/shotdeckai' },
+                    { name: 'facebook', file: 'facebook-icon.png', url: 'https://facebook.com/shotdeckai' },
+                    { name: 'twitter', file: 'twitter-icon.png', url: 'https://twitter.com/shotdeckai' },
+                    { name: 'linkedin', file: 'linkedin-icon.png', url: 'https://linkedin.com/company/shotdeckai' }
+                  ].map((social) => (
+                    <Link 
+                      key={social.name} 
+                      href={social.url} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${social.name} link`} 
+                      className="w-5 h-5 p-1 bg-white/10 rounded shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] flex items-center justify-center hover:bg-white/20 transition-colors"
+                    >
+                      <Image 
+                        src={`/Images/${social.file}`} 
+                        alt={social.name} 
+                        width={16} 
+                        height={16}
+                        className="w-4 h-4"
+                      />
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-
-
           </footer>
         </div>
 
