@@ -99,7 +99,7 @@ export const metadata: Metadata = {
     siteName: 'ShotDeckAI',
     images: [
       {
-        url: 'https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public',
+        url: 'https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public?v=2',
         width: 1200,
         height: 630,
         alt: 'ShotDeckAI - Transform Personal Memories into Cinematic Storyboards',
@@ -113,10 +113,10 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'ShotDeckAI',
     description: 'Transform personal memories into cinematic storyboards. AI-powered visual storytelling that blends your authentic experiences with professional cinematography styles.',
-    images: ['https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public'],
+    images: ['https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public?v=2'],
   },
   other: {
-    'og:image:secure_url': 'https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public',
+    'og:image:secure_url': 'https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/ffaeb306-89f3-4c2a-1b2e-83253c5f9d00/public?v=2',
     'og:image:width': '1200',
     'og:image:height': '630',
   },
