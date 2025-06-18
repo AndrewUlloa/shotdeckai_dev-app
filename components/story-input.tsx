@@ -1,36 +1,214 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useDebounce } from 'use-debounce';
 import { Button } from "@/components/ui/button";
 
 interface StoryInputProps {
   onImageGenerated: (imageUrl: string) => void;
 }
 
+// Track typing rhythm patterns
+interface TypingRhythm {
+  lastKeyTime: number;
+  keyIntervals: number[];
+  deletionStreak: number;
+  isInDeletionMode: boolean;
+  lastPromptLength: number;
+}
+
 export function StoryInput({ onImageGenerated }: StoryInputProps) {
   const [prompt, setPrompt] = useState('');
-  const [debouncedPrompt] = useDebounce(prompt, 300);
+  const [shouldGenerate, setShouldGenerate] = useState(false);
+  const [userState, setUserState] = useState<'typing' | 'thinking' | 'editing' | 'settled'>('typing');
+  const [isFirstInput, setIsFirstInput] = useState(true);
+  
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const rhythmRef = useRef<TypingRhythm>({
+    lastKeyTime: Date.now(),
+    keyIntervals: [],
+    deletionStreak: 0,
+    isInDeletionMode: false,
+    lastPromptLength: 0
+  });
+  
+  // Check if prompt has at least 2 words
+  const hasTwoWords = (text: string) => {
+    const trimmed = text.trim();
+    // Check if there's at least one space between non-space characters
+    return trimmed.includes(' ') && trimmed.split(/\s+/).filter(word => word.length > 0).length >= 2;
+  };
+  
+  // Analyze typing rhythm to determine user intent
+  const analyzeUserIntent = useCallback((newPrompt: string) => {
+    const now = Date.now();
+    const rhythm = rhythmRef.current;
+    const timeSinceLastKey = now - rhythm.lastKeyTime;
+    
+    // Keep a rolling window of key intervals (last 10)
+    rhythm.keyIntervals.push(timeSinceLastKey);
+    if (rhythm.keyIntervals.length > 10) {
+      rhythm.keyIntervals.shift();
+    }
+    
+    // Calculate average typing speed
+    const avgInterval = rhythm.keyIntervals.reduce((a, b) => a + b, 0) / rhythm.keyIntervals.length;
+    
+    // Detect deletion patterns
+    const lengthDiff = newPrompt.length - rhythm.lastPromptLength;
+    if (lengthDiff < 0) {
+      rhythm.deletionStreak += Math.abs(lengthDiff);
+      rhythm.isInDeletionMode = true;
+    } else if (lengthDiff > 0) {
+      // User started typing again after deletion
+      if (rhythm.isInDeletionMode && rhythm.deletionStreak > 5) {
+        // Major deletion followed by typing = rethinking
+        setUserState('editing');
+      } else {
+        rhythm.deletionStreak = 0;
+        rhythm.isInDeletionMode = false;
+        setUserState('typing');
+      }
+    }
+    
+    rhythm.lastKeyTime = now;
+    rhythm.lastPromptLength = newPrompt.length;
+    
+    // Calculate dynamic delay based on user behavior
+    let delay: number;
+    
+    if (rhythm.isInDeletionMode) {
+      // User is actively deleting
+      if (rhythm.deletionStreak > 20) {
+        delay = 4000; // Major rethinking - 4 seconds
+        setUserState('editing');
+      } else if (rhythm.deletionStreak > 5) {
+        delay = 2500; // Moderate editing - 2.5 seconds
+        setUserState('editing');
+      } else {
+        delay = 1500; // Minor typo fix - 1.5 seconds
+      }
+    } else if (newPrompt.length < 15) {
+      // Very short prompt - user just starting
+      delay = 3000; // 3 seconds
+      setUserState('thinking');
+    } else if (avgInterval < 100 && timeSinceLastKey < 200) {
+      // Fast, continuous typing
+      delay = 2000; // 2 seconds
+      setUserState('typing');
+    } else if (timeSinceLastKey > 1000) {
+      // User paused for over a second before this keystroke
+      delay = 2500; // 2.5 seconds - they might be thinking
+      setUserState('thinking');
+    } else {
+      // Normal typing rhythm
+      delay = 1800; // 1.8 seconds
+      setUserState('typing');
+    }
+    
+    return delay;
+  }, []);
+
+  const handlePromptChange = useCallback((newPrompt: string) => {
+    setPrompt(newPrompt);
+    
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Don't generate for empty prompts
+    if (!newPrompt.trim()) {
+      setShouldGenerate(false);
+      setUserState('typing');
+      rhythmRef.current.deletionStreak = 0;
+      rhythmRef.current.isInDeletionMode = false;
+      return;
+    }
+    
+    // INSTANT GENERATION FOR FIRST INPUT WITH 2 WORDS
+    if (isFirstInput && hasTwoWords(newPrompt)) {
+      setUserState('settled');
+      setShouldGenerate(true);
+      setIsFirstInput(false);
+      return; // Skip normal rhythm analysis
+    }
+    
+    // For all other cases, use rhythm-based analysis
+    const delay = analyzeUserIntent(newPrompt);
+    
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
+      // Final check: only generate if not in deletion mode
+      if (!rhythmRef.current.isInDeletionMode) {
+        setUserState('settled');
+        setShouldGenerate(true);
+        if (isFirstInput) {
+          setIsFirstInput(false);
+        }
+      }
+    }, delay);
+  }, [analyzeUserIntent, isFirstInput]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const { isLoading, error } = useQuery({
-    queryKey: [debouncedPrompt],
+    queryKey: ['generateImage', prompt],
     queryFn: async () => {
-      if (!debouncedPrompt.trim()) return null;
       const res = await fetch('/api/generateImage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: debouncedPrompt }),
+        body: JSON.stringify({ prompt }),
       });
+      
+      if (!res.ok) {
+        throw new Error('Failed to generate image');
+      }
+      
       const json = await res.json();
-      onImageGenerated(json.url);
+      if (json.url) {
+        onImageGenerated(json.url);
+        setShouldGenerate(false);
+        setUserState('settled');
+      }
       return json;
     },
-    enabled: !!debouncedPrompt.trim(),
+    enabled: shouldGenerate && !!prompt.trim(),
     staleTime: Infinity,
-    retry: false,
+    retry: 1,
   });
+
+  // Get status message based on user state
+  const getStatusMessage = () => {
+    if (isLoading) return "Generating image...";
+    if (error) return null;
+    if (!prompt.trim()) return null;
+    
+    // Don't show typing hints on first input to keep it feeling instant
+    if (isFirstInput && !isLoading) return null;
+    
+    switch (userState) {
+      case 'typing':
+        return "Keep going...";
+      case 'thinking':
+        return "Taking your time...";
+      case 'editing':
+        return "Refining your idea...";
+      case 'settled':
+        return null;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div id="story-input" className="w-full rounded-2xl md:border-gradient md:backdrop-blur-[10px] md:shadow-lg md:p-1">
@@ -44,7 +222,8 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
           inputMode="text"
           autoComplete="off"
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => handlePromptChange(e.target.value)}
+          style={{ fontSize: '16px' }}
         />
         <Button 
           variant="ghost" 
@@ -54,7 +233,9 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
           Style
         </Button>
       </div>
-      {isLoading && <p className="text-white mt-2 px-4 text-sm">Generating image...</p>}
+      {getStatusMessage() && (
+        <p className="text-white/60 mt-2 px-4 text-sm animate-pulse">{getStatusMessage()}</p>
+      )}
       {error && <p className="text-red-500 mt-2 px-4 text-sm">Error generating image. Please try again.</p>}
     </div>
   )
