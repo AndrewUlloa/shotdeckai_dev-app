@@ -310,7 +310,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
         />
         <Button 
           variant="ghost" 
-          className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden md:block"
+          className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden"
           disabled={isLoading}
         >
           Style
