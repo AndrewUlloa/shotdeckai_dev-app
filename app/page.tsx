@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 import { StoryInput } from "@/components/story-input";
 import { useState } from 'react';
@@ -64,13 +63,7 @@ export default function Home() {
     setIsGenerating(true);
   };
 
-  const handleInvitationClick = () => {
-    // Find the PrelaunchSignup button in header and trigger its click
-    const headerButton = document.querySelector('header button');
-    if (headerButton) {
-      (headerButton as HTMLButtonElement).click();
-    }
-  };
+
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -182,12 +175,7 @@ export default function Home() {
                   Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.
                 </p>
                 <div className="mt-4">
-                  <Button 
-                    className="text-white text-lg px-8 h-auto" 
-                    onClick={handleInvitationClick}
-                  >
-                    Get your invitation
-                  </Button>
+                  <PrelaunchSignup />
                 </div>
               </div>
 
