@@ -79,15 +79,10 @@ export default function PrelaunchSignup() {
           >
             <motion.div 
               className="m-10 flex items-center p-1.5 bg-white/60 border-gradient-lg rounded-outer-signup lg:p-2"
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 20,
-                duration: 0.3 
-              }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col bg-gradient-to-b from-white from-0% via-offwhite via-66% to-bluegray to-90%
