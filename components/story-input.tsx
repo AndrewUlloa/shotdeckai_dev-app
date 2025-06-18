@@ -139,13 +139,14 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
     
     // Set new timeout
     timeoutRef.current = setTimeout(() => {
-      // Final check: only generate if not in deletion mode
-      if (!rhythmRef.current.isInDeletionMode) {
-        setUserState('settled');
-        setShouldGenerate(true);
-        if (isFirstInput) {
-          setIsFirstInput(false);
-        }
+      // After the delay, user has stopped typing - reset deletion mode and generate
+      rhythmRef.current.isInDeletionMode = false;
+      rhythmRef.current.deletionStreak = 0;
+      
+      setUserState('settled');
+      setShouldGenerate(true);
+      if (isFirstInput) {
+        setIsFirstInput(false);
       }
     }, delay);
   }, [analyzeUserIntent, isFirstInput]);
