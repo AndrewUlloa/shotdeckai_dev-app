@@ -20,8 +20,8 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
   }, [imageUrls]);
 
   return (
-    <div className="w-full aspect-[4/3] bg-white/10 shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] backdrop-blur-[5px] rounded-[20px] p-5 md:rounded-2xl md:border-gradient md:backdrop-blur-[10px] md:shadow-lg md:p-2">
-      <div className="w-full h-full bg-white/30 border border-white/50 rounded-lg md:bg-white/10 md:rounded-xl overflow-hidden">
+    <div className="w-full bg-white/10 shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] backdrop-blur-[5px] rounded-[20px] p-5 md:rounded-2xl md:border-gradient md:backdrop-blur-[10px] md:shadow-lg md:p-2">
+      <div className="w-full aspect-[4/3] bg-white/30 border border-white/50 rounded-lg md:bg-white/10 md:rounded-xl overflow-hidden">
         <div className="relative w-full h-full">
           {isLoading ? (
             // Skeleton loading state - gradient only
