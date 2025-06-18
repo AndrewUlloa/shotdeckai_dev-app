@@ -4,6 +4,15 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: ["class"],
+  safelist: [
+    // Ensure theme classes are included in the build
+    'light',
+    'dark',
+    'bg-glass-bg',
+    'border-glass-border',
+    'text-text-primary',
+    'text-text-secondary',
+  ],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -16,6 +25,19 @@ const config: Config = {
         black: '#000000',
         offwhite: '#EBEDEC',
         bluegray: '#DFE4F2',
+        // Theme-aware colors using CSS variables
+        glass: {
+          bg: 'var(--glass-bg)',
+          border: 'var(--glass-border)',
+        },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+        },
+        shadow: {
+          primary: 'var(--shadow-primary)',
+          secondary: 'var(--shadow-secondary)',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

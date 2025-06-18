@@ -61,6 +61,7 @@ h1 {
 
 @layer base {
   :root {
+    /* Light mode colors */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -86,8 +87,18 @@ h1 {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    
+    /* Custom theme variables for your app */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --text-primary: rgba(255, 255, 255, 1);
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --shadow-primary: rgba(0, 0, 0, 0.25);
+    --shadow-secondary: rgba(158, 158, 170, 0.25);
   }
+  
   .dark {
+    /* Dark mode colors */
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -112,6 +123,14 @@ h1 {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    
+    /* Custom dark theme variables */
+    --glass-bg: rgba(0, 0, 0, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-primary: rgba(255, 255, 255, 1);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --shadow-primary: rgba(0, 0, 0, 0.5);
+    --shadow-secondary: rgba(100, 100, 110, 0.25);
   }
 }
 
@@ -233,18 +252,5 @@ h1 {
   /* Mobile main content spacing */
   main {
     padding-bottom: 30px;
-  }
-
-  /* Mobile text styles */
-  h1.mobile-headline {
-    font-size: 24px;
-    line-height: 24px;
-    font-weight: 400;
-  }
-
-  p.mobile-subtitle {
-    font-size: 12px;
-    line-height: 17px;
-    font-weight: 700;
   }
 }

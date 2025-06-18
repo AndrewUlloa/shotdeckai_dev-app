@@ -8,6 +8,7 @@ import { StoryInput } from "@/components/story-input";
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PrelaunchSignup from "@/components/prelaunch-signup";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 
 const queryClient = new QueryClient()
@@ -29,7 +30,7 @@ export default function Home() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')]">
+      <div className="flex flex-col min-h-screen bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/91e48437-d233-4eeb-d49e-57fed3715100/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/91e48437-d233-4eeb-d49e-57fed3715100/public')]">
         {/* Mobile Layout (up to 768px) */}
         <div className="md:hidden flex flex-col min-h-screen">
           {/* Mobile Header */}
@@ -37,8 +38,11 @@ export default function Home() {
             <div className="w-8 h-8 bg-white/10 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] border border-white/50 backdrop-blur-[5px] flex items-center justify-center">
               <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
-            <div className="mobile-header-button">
-              <PrelaunchSignup />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <div className="mobile-header-button">
+                <PrelaunchSignup />
+              </div>
             </div>
           </header>
 
@@ -46,12 +50,11 @@ export default function Home() {
           <main className="flex-1 flex flex-col items-center px-10 gap-2.5">
             {/* Text Section */}
             <div className="flex flex-col items-center gap-2.5 w-full max-w-[350px] mb-5">
-              <h1 className="mobile-headline text-center text-white font-instrumentSerifRegular">
+              <h1 className="text-center text-white font-instrumentSerifRegular text-[24px] font-normal leading-[100%]">
                 Your Creative Vision, Realized<br />
-                Instantly—With AI That<br />
-                Feels Like Magic.
+                Instantly—With AI That Feels Like Magic.
               </h1>
-              <p className="mobile-subtitle text-white text-center max-w-[350px]">
+              <p className="text-white text-center max-w-[350px] font-eudoxusBold text-xs leading-normal">
                 Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards faster than a thought.
               </p>
             </div>
@@ -115,7 +118,10 @@ export default function Home() {
             <div className="w-8 h-8 bg-white/10 rounded-sm shadow-inner border border-white/50 backdrop-blur-[10px] flex items-center justify-center">
               <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
-            <PrelaunchSignup />
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <PrelaunchSignup />
+            </div>
           </header>
 
           {/* Desktop Main Content */}
@@ -128,7 +134,7 @@ export default function Home() {
                   Instantly—With AI That<br />
                   Feels Like Magic.
                 </h1>
-                <p className="text-white text-base md:text-lg lg:text-xl font-eudoxusLight leading-relaxed max-w-xl">
+                <p className="text-white text-base md:text-lg lg:text-xl font-eudoxusBold leading-normal max-w-xl">
                   Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.
                 </p>
                 <div className="mt-4">

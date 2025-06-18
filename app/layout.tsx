@@ -105,9 +105,26 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Immediately set the theme to prevent flash
+              (function() {
+                try {
+                  const storedTheme = localStorage.getItem('theme');
+                  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  
+                  if (storedTheme === 'dark' || (storedTheme === 'system' && systemDark) || (!storedTheme && systemDark)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} ${eudoxusExtraLight.variable} ${eudoxusLight.variable} ${eudoxusRegular.variable} ${eudoxusMedium.variable} ${eudoxusBold.variable} ${eudoxusExtraBold.variable} ${instrumentSerifItalic.variable} ${instrumentSerifRegular.variable} w-full overflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
+        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} ${eudoxusExtraLight.variable} ${eudoxusLight.variable} ${eudoxusRegular.variable} ${eudoxusMedium.variable} ${eudoxusBold.variable} ${eudoxusExtraBold.variable} ${instrumentSerifItalic.variable} ${instrumentSerifRegular.variable} w-full overflow-hidden`}
       >
         <Providers>{children}</Providers>
       </body>
