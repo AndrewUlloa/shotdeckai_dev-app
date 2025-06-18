@@ -47,24 +47,24 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
   };
 
   return (
-    <div className="w-full bg-white/10 shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] backdrop-blur-[5px] rounded-[20px] p-5 md:rounded-2xl md:border-gradient md:backdrop-blur-[10px] md:shadow-lg md:p-2">
-      <div className="w-full aspect-[4/3] bg-white/30 border border-white/50 rounded-lg md:bg-white/10 md:rounded-xl overflow-hidden">
+    <div className="w-full rounded-2xl border-gradient backdrop-blur-[10px] dark:backdrop-blur-[10px] dark:bg-white/10 shadow-lg p-2">
+      <div className="w-full aspect-[4/3] bg-white/10 rounded-xl overflow-hidden">
         <div className="relative w-full h-full">
           {isLoading && !displayedImageUrl ? (
             // Initial loading state - gradient only
-            <div className="w-full h-full skeleton-base rounded-lg md:rounded-xl"></div>
+            <div className="w-full h-full skeleton-base rounded-xl"></div>
           ) : displayedImageUrl ? (
             <>
               {imageLoading && !isFadingOut && (
                 // Loading overlay for new image - gradient only
-                <div className="absolute inset-0 z-10 skeleton-base rounded-lg md:rounded-xl"></div>
+                <div className="absolute inset-0 z-10 skeleton-base rounded-xl"></div>
               )}
               <Image 
                 src={displayedImageUrl}
                 alt={`Generated storyboard frame ${currentImageIndex + 1}`}
                 fill
                 style={{ objectFit: "cover" }}
-                className={`rounded-lg md:rounded-xl transition-all duration-300 ${isFadingOut ? 'ease-out' : 'ease-in'} ${getImageClassName()}`}
+                className={`rounded-xl transition-all duration-300 ${isFadingOut ? 'ease-out' : 'ease-in'} ${getImageClassName()}`}
                 onLoadingComplete={() => {
                   setImageLoading(false);
                 }}
