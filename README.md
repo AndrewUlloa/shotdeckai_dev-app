@@ -2,6 +2,34 @@
 
 Welcome to **ShotDeckAI**, the ultimate AI-powered platform for creative professionals and aspiring artists. This private repository contains the core technology behind ShotDeckAI, which enables users to effortlessly generate personalized storyboards, video concepts, and cinematic guidance based on their unique creative vision, emotions, and experiences.
 
+## Recent Updates (Jun 17, 2025 08:49 PM - Jun 18, 2025 03:29 AM)
+
+| Category            | Feature/Fix            | Description                                                                           | Files Modified                                                     |
+| ------------------- | ---------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **🎨 Theme System** | Dark Mode Support      | Implemented comprehensive theme support with custom CSS variables and animated toggle | `layout.tsx`, `globals.css`, `theme-toggle.tsx`, `theme-config.ts` |
+| **🎨 Theme System** | Theme Documentation    | Created dedicated theme documentation                                                 | `docs/THEMING.md`                                                  |
+| **📱 UI/UX**        | Animation Integration  | Added Framer Motion for smooth transitions and animations                             | `prelaunch-signup.tsx`, `story-input.tsx`, `storyboard-frame.tsx`  |
+| **📱 UI/UX**        | Typography Enhancement | Added Instrument Serif fonts for improved readability                                 | `globals.css`, `layout.tsx`, `logo-with-text.tsx`                  |
+| **📱 UI/UX**        | Social Media Icons     | Consolidated icons as SVG components for better performance                           | `page.tsx`                                                         |
+| **🚀 Performance**  | Image Caching          | Implemented image caching in story generation flow                                    | `story-input.tsx`                                                  |
+| **🚀 Performance**  | Loading States         | Added skeleton loading states for better user feedback                                | `storyboard-frame.tsx`                                             |
+| **🤖 AI Features**  | Typing Rhythm Analysis | Enhanced story input with dynamic generation delays based on typing patterns          | `story-input.tsx`, `generateImage/route.ts`                        |
+| **📱 Mobile**       | Responsive Layout      | Refactored layouts for improved mobile experience                                     | `page.tsx`, `globals.css`, `prelaunch-signup.tsx`                  |
+| **📱 Mobile**       | Network Access         | Updated dev script to enable mobile testing                                           | `package.json`                                                     |
+| **🔍 SEO**          | Meta Tags              | Enhanced metadata with Open Graph and Twitter Card integration                        | `layout.tsx`                                                       |
+| **🐛 Bug Fixes**    | Styling Consistency    | Fixed padding, colors, and layout issues across components                            | Multiple components                                                |
+| **🐛 Bug Fixes**    | Background Images      | Updated dark mode backgrounds and positioning                                         | `page.tsx`                                                         |
+| **🔧 DevOps**       | Build Configuration    | Added `.nvmrc` and build script for deployment                                        | `.nvmrc`, `build.sh`                                               |
+| **🔧 DevOps**       | Image Configuration    | Updated Next.js config for image optimization                                         | `next.config.mjs`                                                  |
+
+### Summary Statistics
+
+- **Total Commits**: 29
+- **Files Modified**: 15+ unique files
+- **New Features**: 8 major features
+- **Bug Fixes**: 13 styling and layout fixes
+- **Performance Improvements**: 3 optimizations
+
 ## Overview
 
 **ShotDeckAI** leverages state-of-the-art technologies to provide an intuitive and highly personalized experience for content creators, filmmakers, and influencers. By integrating AI-driven tools with advanced generative models, ShotDeckAI helps users transform abstract ideas into visually compelling narratives.
