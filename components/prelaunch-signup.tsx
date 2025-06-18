@@ -4,7 +4,6 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Check, Loader2 } from "lucide-react"
 import { ArrowUpIcon } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 import { LogoWithText } from "@/components/ui/logo-with-text"
@@ -108,8 +107,8 @@ export default function PrelaunchSignup() {
                 </div>
                 <form onSubmit={handleSubmit}>
                   <div>
-                    <div className="flex flex-row border-2 border-DFE4F2 py-2 pl-4 pr-2 justify-between bg-white rounded-full frame-bg-effects-blur-light">
-                      <Input className="flex shadow-none leading-tight font-eudoxusLight placeholder:text-#A1A1A1  lg:min-w-80 text-xl"
+                    <div className="flex flex-row border-2 border-bluegray py-2 pl-4 pr-2 justify-between bg-white rounded-full frame-bg-effects-blur-light">
+                      <Input className="flex shadow-none leading-tight font-eudoxusLight placeholder:text-[#A1A1A1] lg:min-w-80 text-xl"
                         id="email"
                         placeholder="Enter your email"
                         type="email"
@@ -118,20 +117,11 @@ export default function PrelaunchSignup() {
                         required
                         /> 
                         <IconButton
+                        className="w-4 h-4"
                         type="submit"
                         disabled={isSubmitted || isLoading}
                       >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="animate-spin" />
-                          </>
-                        ) : isSubmitted ? (
-                          <>
-                            <Check /> 
-                          </>
-                        ) : (
-                          <ArrowUpIcon/>
-                        )}
+                        <ArrowUpIcon/>
                       </IconButton>
                     </div>
                     {error && <p className="text-red-500 text-sm">{error}</p>}

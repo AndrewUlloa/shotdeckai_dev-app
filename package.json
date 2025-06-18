@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node -e \"const os=require('os');const ifaces=os.networkInterfaces();let ip='127.0.0.1';for(const name of Object.keys(ifaces)){for(const iface of ifaces[name]){if(!iface.internal&&iface.family==='IPv4'){ip=iface.address;break;}}}console.log('\\n📱 Your app will be available at:\\n');console.log('  Local:           http://localhost:3000');console.log('  On Your Network: http://'+ip+':3000\\n');\" && next dev --hostname 0.0.0.0",
+    "dev:network": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

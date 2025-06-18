@@ -35,10 +35,10 @@ export default function Home() {
                     <div className="p-[3px] h-8 w-8 rounded-sm .shadow shadow-inner border border-gradient backdrop-blur-[10px]  items-center justify-center">
                     <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={32} height={32} />
                     </div>
-                    <span className="text-white text-2xl sm:text-[32px] --font-supremeLLBold leading-tighter tracking-tighter">ShotDeckAI</span>
+                    <span className="text-white text-2xl sm:text-[32px] font-supremeLLBold leading-tighter tracking-tighter">ShotDeckAI</span>
                 </div>
             </div>
-            <div className="flex-row content-center text-white text-xs --font-supremeLLBook font-normal tracking-tighter">built with love in bogota ❤️</div>
+            <div className="flex-row content-center text-white text-xs font-supremeLLBook font-normal tracking-tighter">built with love in bogota ❤️</div>
             <div className="flex flex-row gap-4 justify-center items-center my-0">
             {['icon-1', 'icon-2', 'icon-3', 'icon-4', 'icon-5'].map((iconName, index) => (
                 <Link 

@@ -33,8 +33,8 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
   });
 
   return (
-    <div className="w-full rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg p-1">
-      <div className="flex items-center gap-2 bg-white/10 rounded-xl p-2">
+    <div id="story-input" className="w-full rounded-2xl md:border-gradient md:backdrop-blur-[10px] md:shadow-lg md:p-1">
+      <div className="flex items-center gap-2 md:bg-white/10 md:rounded-xl md:p-2">
         <textarea
           className="flex-1 bg-transparent placeholder:text-white/70 text-white text-base font-inter resize-none outline-none px-3 py-2"
           rows={1}
@@ -48,7 +48,7 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
         />
         <Button 
           variant="ghost" 
-          className="text-white hover:bg-white/10 px-4 py-2 h-auto"
+          className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden md:block"
           disabled={isLoading}
         >
           Style
