@@ -188,10 +188,10 @@ const config: Config = {
           'box-shadow': 'inset 5px 5px 60px 0px #171D0020',
         },
         '.linear-gradient-popover': {
-          background: 'bg-gradient-to-b from white from-0% to-#ebedec to-66% to-#dfe4f2 to-90%',
+          background: 'linear-gradient(to bottom, white 0%, #ebedec 66%, #dfe4f2 90%)',
         },
         '.input-shadow': {
-          'box-shadow': '0px 2.5px 10px 0px #00000020)',
+          'box-shadow': '0px 2.5px 10px 0px #00000020',
         }
 
       };
