@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/91e48437-d233-4eeb-d49e-57fed3715100/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/91e48437-d233-4eeb-d49e-57fed3715100/public')]">
+      <div className="flex flex-col min-h-screen bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/a701b66d-1710-44f9-04d9-233485c41300/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/3c02e6e1-8388-485a-c344-2e99de2fb900/public')]">
         {/* Mobile Layout (up to 768px) */}
         <div className="md:hidden flex flex-col min-h-screen">
           {/* Mobile Header */}
