@@ -1,7 +1,6 @@
 "use client"
 
 import Image from 'next/image'
-import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from 'react'
 
 interface StoryboardFrameProps {
@@ -18,25 +17,26 @@ export function StoryboardFrameComponent({ imageUrls }: StoryboardFrameProps) {
   }, [imageUrls]);
 
   return (
-    <Card className="w-full max-w-3xl mx-auto frame-bg-effects-blur-light">
-      <CardContent className="p-[10px]">
-        <div className="aspect-[4/3] w-full overflow-hidden border-white/50 bg-white/30 rounded-lg">
-          <div className="relative w-full h-full">
-            {imageUrls.length > 0 ? (
-              <Image 
-                src={imageUrls[currentImageIndex]}
-                alt={`Generated storyboard frame ${currentImageIndex + 1}`}
-                fill
-                style={{ objectFit: "cover" }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-white/30">
-                <Image className="h-8 w-8 border-gradient rounded-sm border-white/50" src="/favicon.ico" alt="Placeholder" width={24} height={24}/>
+    <div className="w-full aspect-[4/3] rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg p-2">
+      <div className="w-full h-full bg-white/10 rounded-xl overflow-hidden">
+        <div className="relative w-full h-full">
+          {imageUrls.length > 0 ? (
+            <Image 
+              src={imageUrls[currentImageIndex]}
+              alt={`Generated storyboard frame ${currentImageIndex + 1}`}
+              fill
+              style={{ objectFit: "cover" }}
+              className="rounded-xl"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-white/10 rounded-lg border border-gradient backdrop-blur-[10px] flex items-center justify-center">
+                <Image src="/favicon.ico" alt="Placeholder" width={48} height={48}/>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
