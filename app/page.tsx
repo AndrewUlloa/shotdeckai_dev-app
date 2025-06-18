@@ -64,8 +64,10 @@ export default function Home() {
                   Your Creative Vision, Realized<br />
                   Instantly—With AI That Feels Like Magic.
                 </h1>
-                <p className="text-white text-center font-eudoxusLight text-xs leading-[120%] w-full">
-                  Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards faster than a thought.
+                <p className="text-white text-center font-eudoxusBold text-xs leading-[120%] w-full">
+                  Effortlessly craft visual stories that evolve with you.<br />
+                  ShotDeckAI anticipates your needs, delivering cinematic<br />
+                  storyboards faster than a thought.
                 </p>
               </div>
 
