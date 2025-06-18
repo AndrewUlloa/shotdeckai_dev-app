@@ -107,7 +107,7 @@ export default function PrelaunchSignup() {
                 </div>
                 <form onSubmit={handleSubmit}>
                   <div>
-                    <div className="flex flex-row border-2 border-bluegray py-2 pl-4 pr-4 justify-between bg-white rounded-full frame-bg-effects-blur-light">
+                    <div className="flex flex-row items-center border-2 border-bluegray py-3 pl-4 pr-4 justify-between bg-white rounded-full frame-bg-effects-blur-light gap-3">
                       <Input className="flex shadow-none leading-tight font-eudoxusLight placeholder:text-[#A1A1A1] lg:min-w-80 text-xl"
                         id="email"
                         placeholder="Enter your email"
