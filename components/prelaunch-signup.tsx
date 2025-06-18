@@ -100,8 +100,8 @@ export default function PrelaunchSignup() {
                   <LogoWithText variant="large" />
                 </div>
                 <div className="flex flex-col gap-3 ">
-                  <h2 className="text-2xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center lg:text-2xl">Get Early Access</h2>
-                  <p className="text-sm font-eudoxusLight tracking-[-0.019rem] text-center lg:text-lg">
+                  <h2 className="text-2xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center lg:text-2xl text-black dark:text-black">Get Early Access</h2>
+                  <p className="text-sm font-eudoxusLight tracking-[-0.019rem] text-center lg:text-lg text-black dark:text-black">
                     Sign up to be notified when we launch!
                   </p>
                 </div>
