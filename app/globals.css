@@ -237,8 +237,7 @@ h1 {
 
   /* Mobile footer styling */
   footer {
-    -webkit-backdrop-filter: blur(17.5px);
-    backdrop-filter: blur(17.5px);
+    /* Removed backdrop filter */
   }
 
   /* Mobile social icons */

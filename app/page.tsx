@@ -32,12 +32,14 @@ export default function Home() {
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-col min-h-screen bg-cover bg-center bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/02c62267-750d-444a-55cd-40d738b6ee00/public')] dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/a701b66d-1710-44f9-04d9-233485c41300/public')] md:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] md:dark:bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/3c02e6e1-8388-485a-c344-2e99de2fb900/public')]">
         {/* Mobile Layout (up to 768px) */}
-        <div className="md:hidden flex flex-col min-h-screen">
-          {/* Mobile Header */}
-          <header className="flex justify-between items-center px-10 pt-7 pb-5">
+        <div className="md:hidden flex flex-col min-h-screen p-4 gap-5 items-center">
+          {/* Mobile Header - Top Bar */}
+          <header className="flex flex-row justify-between items-center w-full h-8 gap-6">
+            {/* Logo Container */}
             <div className="w-8 h-8 bg-white/10 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] border border-white/50 backdrop-blur-[5px] flex items-center justify-center">
               <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
             </div>
+            {/* Right Nav Bar */}
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <div className="mobile-header-button">
@@ -47,41 +49,42 @@ export default function Home() {
           </header>
 
           {/* Mobile Main Content */}
-          <main className="flex-1 flex flex-col items-center px-10 gap-2.5">
-            {/* Text Section */}
-            <div className="flex flex-col items-center gap-2.5 w-full max-w-[350px] mb-5">
-              <h1 className="text-center text-white font-instrumentSerifRegular text-[24px] font-normal leading-[100%]">
-                Your Creative Vision, Realized<br />
-                Instantly—With AI That Feels Like Magic.
-              </h1>
-              <p className="text-white text-center max-w-[350px] font-eudoxusBold text-xs leading-normal">
-                Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards faster than a thought.
-              </p>
-            </div>
+          <main className="flex-1 flex flex-col justify-between items-center px-4 gap-5 w-full">
+            {/* Main Section */}
+            <div className="flex flex-col items-center gap-2.5 w-full">
+              {/* Text Section */}
+              <div className="flex flex-col items-start gap-2.5 w-full">
+                <h1 className="text-center text-white font-instrumentSerifRegular text-[26px] font-normal leading-[100%] tracking-[-0.04em] w-full">
+                  Your Creative Vision, Realized<br />
+                  Instantly—With AI That Feels Like Magic.
+                </h1>
+                <p className="text-white text-center font-eudoxusLight text-xs leading-[120%] w-full">
+                  Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards faster than a thought.
+                </p>
+              </div>
 
-            {/* Mobile Input and Frame */}
-            <div className="flex flex-col gap-2.5 w-full max-w-[350px]">
-              <StoryInput onImageGenerated={handleImageGenerated} />
-              <StoryboardFrameComponent imageUrls={generatedImageUrls} />
+              {/* Image Section */}
+              <div className="flex flex-col items-start gap-2.5 w-full">
+                <StoryInput onImageGenerated={handleImageGenerated} />
+                <StoryboardFrameComponent imageUrls={generatedImageUrls} />
+              </div>
             </div>
           </main>
 
           {/* Mobile Footer */}
-          <footer className="border-t border-white/10 pt-5 pb-5 mt-auto">
-            <div className="flex flex-col items-center gap-3.5 px-10">
-              {/* Logo and Name */}
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] bg-white/10 border border-white/50 backdrop-blur-[5px] flex items-center justify-center">
+          <footer className="flex flex-col items-center pt-4 gap-5 w-full">
+            {/* Footer component */}
+            <div className="flex flex-row justify-center items-center gap-3.5 w-full">
+              {/* Logo Container */}
+              <div className="flex flex-row justify-center items-end gap-2.5">
+                <div className="h-8 w-8 rounded-[1.75px] shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] bg-white/10 border border-white/50 flex items-center justify-center">
                   <Image src="/favicon.ico" alt="ShotDeckAI Logo" width={24} height={24} />
                 </div>
                 <span className="text-white text-2xl font-supremeLLBold tracking-[-0.08em] leading-8">ShotDeckAI</span>
               </div>
 
-              {/* Built with love */}
-              <div className="text-white text-xs font-supremeLLBook tracking-[-0.08em]">built with ❤️ in Bogotá</div>
-
-              {/* Social Icons */}
-              <div className="flex gap-10">
+              {/* Social Media Container */}
+              <div className="flex flex-row justify-center items-center gap-5">
                 {[
                   { name: 'tiktok', file: 'tiktok-icon.png', url: 'https://tiktok.com/@shotdeckai' },
                   { name: 'instagram', file: 'instagram-icon.png', url: 'https://instagram.com/shotdeckai' },
@@ -95,7 +98,7 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${social.name} link`} 
-                    className="w-5 h-5 p-1 bg-white/10 rounded shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] backdrop-blur-[5px] flex items-center justify-center hover:bg-white/20 transition-colors"
+                    className="w-5 h-5 p-1 bg-white/10 rounded shadow-[0px_5px_15px_rgba(0,0,0,0.25),inset_0px_-2px_10px_rgba(158,158,170,0.25)] flex items-center justify-center hover:bg-white/20 transition-colors"
                   >
                     <Image 
                       src={`/Images/${social.file}`} 
@@ -108,6 +111,8 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
+
           </footer>
         </div>
 
