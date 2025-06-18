@@ -15,9 +15,15 @@ const queryClient = new QueryClient()
 
 export default function Home() { 
   const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleImageGenerated = (url: string) => {
     setGeneratedImageUrls([...generatedImageUrls, url]);
+    setIsGenerating(false);
+  };
+
+  const handleGenerationStart = () => {
+    setIsGenerating(true);
   };
 
   const handleInvitationClick = () => {
@@ -65,8 +71,8 @@ export default function Home() {
 
               {/* Image Section */}
               <div className="flex flex-col items-start gap-2.5 w-full">
-                <StoryInput onImageGenerated={handleImageGenerated} />
-                <StoryboardFrameComponent imageUrls={generatedImageUrls} />
+                <StoryInput onImageGenerated={handleImageGenerated} onGenerationStart={handleGenerationStart} />
+                <StoryboardFrameComponent imageUrls={generatedImageUrls} isLoading={isGenerating} />
               </div>
             </div>
           </main>
@@ -154,8 +160,8 @@ export default function Home() {
 
               {/* Right Column - Input and Frame */}
               <div className="flex flex-col gap-4 lg:gap-6">
-                <StoryInput onImageGenerated={handleImageGenerated} />
-                <StoryboardFrameComponent imageUrls={generatedImageUrls} />
+                <StoryInput onImageGenerated={handleImageGenerated} onGenerationStart={handleGenerationStart} />
+                <StoryboardFrameComponent imageUrls={generatedImageUrls} isLoading={isGenerating} />
               </div>
             </div>
           </main>

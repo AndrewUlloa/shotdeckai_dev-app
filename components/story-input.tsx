@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface StoryInputProps {
   onImageGenerated: (imageUrl: string) => void;
+  onGenerationStart?: () => void;
 }
 
 // Track typing rhythm patterns
@@ -17,7 +18,7 @@ interface TypingRhythm {
   lastPromptLength: number;
 }
 
-export function StoryInput({ onImageGenerated }: StoryInputProps) {
+export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputProps) {
   const [prompt, setPrompt] = useState('');
   const [shouldGenerate, setShouldGenerate] = useState(false);
   const [userState, setUserState] = useState<'typing' | 'thinking' | 'editing' | 'settled'>('typing');
@@ -163,6 +164,9 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
   const { isLoading, error } = useQuery({
     queryKey: ['generateImage', prompt],
     queryFn: async () => {
+      // Call generation start callback when query starts
+      onGenerationStart?.();
+      
       const res = await fetch('/api/generateImage', {
         method: 'POST',
         headers: {
