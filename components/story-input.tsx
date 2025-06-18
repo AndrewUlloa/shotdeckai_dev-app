@@ -269,6 +269,8 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   });
 
   // Get status message based on user state
+  // Kept for future use - currently hidden from UI
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusMessage = () => {
     if (isLoading) return "Generating image...";
     if (error) return null;
@@ -314,9 +316,10 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           Style
         </Button>
       </div>
+      {/* Status messages hidden but logic maintained
       {getStatusMessage() && (
         <p className="text-white/60 mt-2 px-4 text-sm animate-pulse">{getStatusMessage()}</p>
-      )}
+      )} */}
       {error && <p className="text-red-500 mt-2 px-4 text-sm">Error generating image. Please try again.</p>}
     </div>
   )

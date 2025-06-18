@@ -28,7 +28,7 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
           setCurrentImageIndex(imageUrls.length - 1);
           setImageLoading(true);
           setIsFadingOut(false);
-        }, 500); // Match the transition duration
+        }, 300); // Match the transition duration
       } else {
         // First image, just show it
         setDisplayedImageUrl(newImageUrl);
@@ -64,7 +64,7 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
                 alt={`Generated storyboard frame ${currentImageIndex + 1}`}
                 fill
                 style={{ objectFit: "cover" }}
-                className={`rounded-lg md:rounded-xl transition-all duration-500 ease-in-out ${getImageClassName()}`}
+                className={`rounded-lg md:rounded-xl transition-all duration-300 ${isFadingOut ? 'ease-out' : 'ease-in'} ${getImageClassName()}`}
                 onLoadingComplete={() => {
                   setImageLoading(false);
                 }}
