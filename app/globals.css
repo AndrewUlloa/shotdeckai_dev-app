@@ -13,18 +13,11 @@ body {
 
 
 h1 {
-  font-family: 'Instrument Serif', serif;
   line-height: 1.2;
   letter-spacing: -0.04em;
   color: white;
 }
-h1 {
-  @media screen and (min-width: 768px) {
-    font-family: 'Instrument Serif', serif;
-    line-height: 1.2;
-    letter-spacing: 0;
-  }
-}
+
 
 
 /* p {

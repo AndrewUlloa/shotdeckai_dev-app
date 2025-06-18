@@ -100,7 +100,8 @@ const config: Config = {
       'eudoxusMedium': ['var(--font-eudoxusMedium)', 'sans-serif'],
       'eudoxusBold': ['var(--font-eudoxusBold)', 'sans-serif'],
       'eudoxusExtraBold': ['var(--font-eudoxusExtraBold)', 'sans-serif'],
-
+      'instrumentSerifRegular': ['var(--font-instrumentRegular)'],
+      'instrumentSerifItalic': ['var(--font-instrumentItalic)'],
     }
   },
   plugins: [
@@ -152,7 +153,7 @@ const config: Config = {
           },
         },
         '.frame-bg-effects-blur-light': {
-          'background-filter': 'blur(10px)',
+          'backdrop-filter': 'blur(10px)',
           'box-shadow': '0px 5px 15px 0px #00000025',
         },
         '.frame-bg-effects-blur-inner': {

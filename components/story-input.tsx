@@ -31,7 +31,7 @@ export function StoryInput({ onImageGenerated }: StoryInputProps) {
   });
 
   return (
-    <div className="w-full max-w-lg mx-auto rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg">
+    <div className="w-full max-w-lg mx-auto rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg lg:hidden">
       <textarea
         className="flex w-full rounded-2xl px-3 py-1 placeholder:text-white text-white text-base font-inter bg-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
         rows={2}

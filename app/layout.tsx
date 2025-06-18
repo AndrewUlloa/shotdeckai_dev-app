@@ -14,6 +14,20 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// InstrumentSerif-Regular
+const instrumentSerifRegular = localFont({
+  src: './fonts/InstrumentSerif-Regular.ttf',
+  display: 'swap',
+  variable: '--font-instrumentRegular'
+})
+
+// InstrumentSerif-Italic
+const instrumentSerifItalic = localFont({
+  src: './fonts/InstrumentSerif-Italic.ttf',
+  display: 'swap',
+  variable: '--font-instrumentItalic'
+})
+
 // SupremeLL-Book
 const supremeLLBook = localFont({
   src: './fonts/SupremeLL-Book.otf',
@@ -93,7 +107,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} ${eudoxusExtraLight.variable} ${eudoxusLight.variable} ${eudoxusRegular.variable} ${eudoxusMedium.variable} ${eudoxusBold.variable} ${eudoxusExtraBold.variable} w-fulloverflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
+        className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} ${eudoxusExtraLight.variable} ${eudoxusLight.variable} ${eudoxusRegular.variable} ${eudoxusMedium.variable} ${eudoxusBold.variable} ${eudoxusExtraBold.variable} ${instrumentSerifItalic} ${instrumentSerifRegular} w-fulloverflow-hidden bg-[url('https://imagedelivery.net/qkb4K12RSBaH1a6IAJIhiQ/f403c70d-82b9-41c0-95ac-5512ad886500/public')] bg-cover bg-center bg-no-repeat bg-fixed`}
       >
         <Providers>{children}</Providers>
       </body>

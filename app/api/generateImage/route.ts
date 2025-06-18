@@ -18,11 +18,11 @@ export async function POST(req: Request) {
       return Response.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
+    const result = await fal.subscribe("fal-ai/flux-realism", {
       input: {
         prompt: "A storyboard frame of a story about " + prompt,
         image_size: "landscape_4_3",
-        num_inference_steps: 2,
+        num_inference_steps: 28,
         enable_safety_checker: true,
         num_images: 1,
         seed: 42,
