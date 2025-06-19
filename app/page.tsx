@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PrelaunchSignup from "@/components/prelaunch-signup";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useTranslations } from "@/lib/i18n-provider";
 
 
 const queryClient = new QueryClient()
@@ -53,6 +54,7 @@ const socialIcons = {
 export default function Home() { 
   const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const t = useTranslations();
 
   const handleImageGenerated = (url: string) => {
     setGeneratedImageUrls([...generatedImageUrls, url]);
@@ -89,13 +91,20 @@ export default function Home() {
               {/* Text Section */}
               <div className="flex flex-col items-start gap-2.5 w-full">
                 <h1 className="text-center text-white font-instrumentSerifRegular text-[26px] font-normal leading-[100%] tracking-[-0.04em] w-full">
-                  Your Creative Vision, Realized<br />
-                  Instantly—With AI That Feels Like Magic.
+                  {t.hero.titleMobile.split('\n').map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      {index < t.hero.titleMobile.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
                 </h1>
                 <p className="text-white text-center font-eudoxusBold text-xs leading-[120%] w-full">
-                  Effortlessly craft visual stories that evolve with you.<br />
-                  ShotDeckAI anticipates your needs, delivering cinematic<br />
-                  storyboards faster than a thought.
+                  {t.hero.subtitleMobile.split('\n').map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      {index < t.hero.subtitleMobile.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
                 </p>
               </div>
 
@@ -167,12 +176,15 @@ export default function Home() {
               {/* Left Column - Text Content */}
               <div className="flex flex-col gap-4 lg:gap-6">
                 <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight text-white font-instrumentSerifRegular">
-                  Your Creative Vision, Realized<br />
-                  Instantly—With AI That<br />
-                  Feels Like Magic.
+                  {t.hero.title.split('\n').map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      {index < t.hero.title.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
                 </h1>
                 <p className="text-white text-base md:text-lg lg:text-xl font-eudoxusBold leading-normal max-w-xl">
-                  Effortlessly craft visual stories that evolve with you. ShotDeckAI anticipates your needs, delivering cinematic storyboards and ideas faster than a thought.
+                  {t.hero.subtitle}
                 </p>
                 <div className="mt-4">
                   <PrelaunchSignup />
@@ -199,7 +211,7 @@ export default function Home() {
               </div>
 
               {/* Built with love */}
-              <div className="text-white text-sm font-supremeLLBook">built with ❤️ in Bogotá</div>
+              <div className="text-white text-sm font-supremeLLBook">{t.footer.builtWith}</div>
 
               {/* Social Icons */}
               <div className="flex gap-3">

@@ -9,6 +9,7 @@ import { IconButton } from "@/components/ui/icon-button"
 import { LogoWithText } from "@/components/ui/logo-with-text"
 import { X } from "lucide-react"
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from "@/lib/i18n-provider"
 
 
 export default function PrelaunchSignup() {
@@ -17,6 +18,7 @@ export default function PrelaunchSignup() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const t = useTranslations()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,7 +49,7 @@ export default function PrelaunchSignup() {
       }, 3000)
     } catch (err) {
       console.error(err)
-      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.')
+      setError(err instanceof Error ? err.message : t.prelaunch.errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -62,10 +64,10 @@ export default function PrelaunchSignup() {
   return (
     <>
       <Button className="hidden sm:block text-white text-lg px-8 h-auto" onClick={() => setIsOpen(true)}>
-        Get your invitation
+        {t.prelaunch.buttonText}
       </Button>
       <Button className="sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden text-white text-base px-6 py-4 h-auto" onClick={() => setIsOpen(true)}>
-        Get invited
+        {t.prelaunch.buttonTextMobile}
       </Button>
       <AnimatePresence>
         {isOpen && (
@@ -95,9 +97,9 @@ export default function PrelaunchSignup() {
                   <LogoWithText variant="large" />
                 </div>
                 <div className="flex flex-col gap-3 ">
-                  <h2 className="text-2xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center lg:text-2xl text-black dark:text-black">Get Early Access</h2>
+                  <h2 className="text-2xl font-eudoxusMedium font-medium tracking-[-0.019rem] text-center lg:text-2xl text-black dark:text-black">{t.prelaunch.modalTitle}</h2>
                   <p className="text-sm font-eudoxusLight tracking-[-0.019rem] text-center lg:text-lg text-black dark:text-black">
-                    Sign up to be notified when we launch!
+                    {t.prelaunch.modalSubtitle}
                   </p>
                 </div>
                 <form onSubmit={handleSubmit}>
@@ -105,7 +107,7 @@ export default function PrelaunchSignup() {
                     <div className="flex flex-row items-center border-2 border-bluegray py-3 pl-4 pr-4 justify-between bg-white rounded-full frame-bg-effects-blur-light gap-3">
                       <Input className="flex shadow-none leading-tight font-eudoxusLight placeholder:text-[#A1A1A1] lg:min-w-80 text-xl"
                         id="email"
-                        placeholder="Enter your email"
+                        placeholder={t.prelaunch.emailPlaceholder}
                         type="email"
                         value={email}
                         onChange ={(e) => setEmail(e.target.value)}

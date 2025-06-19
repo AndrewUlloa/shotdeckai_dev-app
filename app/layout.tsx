@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
+import { getLocale } from "@/lib/get-locale";
+import { TranslationProvider } from "@/lib/i18n-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -127,8 +129,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = getLocale();
+  
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
+    <html lang={locale === 'es-CO' ? 'es' : 'en'} suppressHydrationWarning className="h-full">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
@@ -154,7 +158,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${supremeLLBook.variable} ${supremeLLBold.variable} ${eudoxusExtraLight.variable} ${eudoxusLight.variable} ${eudoxusRegular.variable} ${eudoxusMedium.variable} ${eudoxusBold.variable} ${eudoxusExtraBold.variable} ${instrumentSerifItalic.variable} ${instrumentSerifRegular.variable} w-full`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <TranslationProvider locale={locale}>
+            {children}
+          </TranslationProvider>
+        </Providers>
       </body>
     </html>
   );

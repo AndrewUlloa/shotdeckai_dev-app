@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n-provider";
 
 interface StoryInputProps {
   onImageGenerated: (imageUrl: string) => void;
@@ -72,6 +73,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const [userState, setUserState] = useState<'typing' | 'thinking' | 'editing' | 'settled'>('typing');
   const [isFirstInput, setIsFirstInput] = useState(true);
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState('');
+  const t = useTranslations();
   
   const timeoutRef = useRef<NodeJS.Timeout>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -309,7 +311,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           className="flex-1 bg-transparent placeholder:text-white/70 text-white text-base font-inter resize-none outline-none px-3 py-2"
           rows={1}
           spellCheck="false"
-          placeholder="My story looks and feels like..."
+          placeholder={t.input.placeholder}
           required
           inputMode="text"
           autoComplete="off"
@@ -322,14 +324,14 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden"
           disabled={isLoading}
         >
-          Style
+          {t.input.styleButton}
         </Button>
       </div>
       {/* Status messages hidden but logic maintained
       {getStatusMessage() && (
         <p className="text-white/60 mt-2 px-4 text-sm animate-pulse">{getStatusMessage()}</p>
       )} */}
-      {error && <p className="text-red-500 mt-2 px-4 text-sm">Error generating image. Please try again.</p>}
+      {error && <p className="text-red-500 mt-2 px-4 text-sm">{t.errors.generateImage}</p>}
     </div>
   )
 }
