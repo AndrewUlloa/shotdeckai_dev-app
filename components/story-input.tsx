@@ -74,6 +74,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState('');
   
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const rhythmRef = useRef<TypingRhythm>({
     lastKeyTime: Date.now(),
     keyIntervals: [],
@@ -233,6 +234,13 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     };
   }, []);
 
+  // Auto-focus the textarea when component mounts
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
   const { isLoading, error } = useQuery({
     queryKey: ['generateImage', prompt, shouldGenerate], // Add shouldGenerate to force refetch
     queryFn: async () => {
@@ -297,6 +305,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     <div id="story-input" className="w-full rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg p-0 md:p-1">
       <div className="flex items-center gap-2 rounded-xl p-0 md:p-2">
         <textarea
+          ref={textareaRef}
           className="flex-1 bg-transparent placeholder:text-white/70 text-white text-base font-inter resize-none outline-none px-3 py-2"
           rows={1}
           spellCheck="false"
