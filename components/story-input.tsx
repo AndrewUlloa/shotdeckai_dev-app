@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
+import { GlowEffect } from "@/components/ui/glow-effect";
 import { useTranslations } from "@/lib/i18n-provider";
 
 interface StoryInputProps {
@@ -73,6 +74,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const [userState, setUserState] = useState<'typing' | 'thinking' | 'editing' | 'settled'>('typing');
   const [isFirstInput, setIsFirstInput] = useState(true);
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const t = useTranslations();
   
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -304,34 +306,49 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   };
 
   return (
-    <div id="story-input" className="w-full rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg p-0 md:p-1">
-      <div className="flex items-center gap-2 rounded-xl p-0 md:p-2">
-        <textarea
-          ref={textareaRef}
-          className="flex-1 bg-transparent placeholder:text-white/70 text-white text-base font-inter resize-none outline-none px-3 py-2"
-          rows={1}
-          spellCheck="false"
-          placeholder={t.input.placeholder}
-          required
-          inputMode="text"
-          autoComplete="off"
-          value={prompt}
-          onChange={(e) => handlePromptChange(e.target.value)}
-          style={{ fontSize: '16px' }}
+    <div className="relative w-full p-1 rounded-2xl">
+      <div 
+        className={`transition-opacity duration-500 ease-out ${isFocused ? 'opacity-0' : 'opacity-100'}`}
+      >
+        <GlowEffect
+          colors={['#FF5733', '#33FF57', '#3357FF', '#F1C40F']}
+          mode='colorShift'
+          blur='soft'
+          duration={3}
+          scale={1}
         />
-        <Button 
-          variant="ghost" 
-          className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden"
-          disabled={isLoading}
-        >
-          {t.input.styleButton}
-        </Button>
       </div>
-      {/* Status messages hidden but logic maintained
-      {getStatusMessage() && (
-        <p className="text-white/60 mt-2 px-4 text-sm animate-pulse">{getStatusMessage()}</p>
-      )} */}
-      {error && <p className="text-red-500 mt-2 px-4 text-sm">{t.errors.generateImage}</p>}
+      <div id="story-input" className="relative w-full rounded-2xl border-gradient backdrop-blur-[10px] shadow-lg p-0 md:p-1 bg-black/90">
+        <div className="flex items-center gap-2 rounded-xl p-0 md:p-2">
+          <textarea
+            ref={textareaRef}
+            className="flex-1 bg-transparent placeholder:text-white/70 text-white text-base font-inter resize-none outline-none px-3 py-2"
+            rows={1}
+            spellCheck="false"
+            placeholder={t.input.placeholder}
+            required
+            inputMode="text"
+            autoComplete="off"
+            value={prompt}
+            onChange={(e) => handlePromptChange(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            style={{ fontSize: '16px' }}
+          />
+          <Button 
+            variant="ghost" 
+            className="text-white hover:bg-white/10 px-4 py-2 h-auto hidden"
+            disabled={isLoading}
+          >
+            {t.input.styleButton}
+          </Button>
+        </div>
+        {/* Status messages hidden but logic maintained
+        {getStatusMessage() && (
+          <p className="text-white/60 mt-2 px-4 text-sm animate-pulse">{getStatusMessage()}</p>
+        )} */}
+        {error && <p className="text-red-500 mt-2 px-4 text-sm">{t.errors.generateImage}</p>}
+      </div>
     </div>
   )
 }
