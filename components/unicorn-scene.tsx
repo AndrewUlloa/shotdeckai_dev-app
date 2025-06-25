@@ -6,33 +6,15 @@ interface UnicornSceneProps {
   className?: string;
 }
 
-interface UnicornSceneInstance {
-  destroy: () => void;
-  resize: () => void;
-  paused: boolean;
-}
-
-interface UnicornStudioConfig {
-  elementId: string;
-  fps?: number;
-  scale?: number;
-  dpi?: number;
-  projectId?: string;
-  filePath?: string;
-  lazyLoad?: boolean;
-  production?: boolean;
-  fixed?: boolean;
-  interactivity?: {
-    mouse?: {
-      disableMobile?: boolean;
-    };
-  };
+interface UnicornStudioScene {
+  destroy?: () => void;
+  resize?: () => void;
 }
 
 export function UnicornScene({ className = "" }: UnicornSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [scene, setScene] = useState<UnicornSceneInstance | null>(null);
+  const [scene, setScene] = useState<UnicornStudioScene | null>(null);
 
   // Load the Unicorn Studio SDK
   useEffect(() => {
@@ -67,27 +49,26 @@ export function UnicornScene({ className = "" }: UnicornSceneProps) {
       try {
         console.log('Initializing Unicorn Studio scene...');
         
-        const UnicornStudio = (window as { UnicornStudio?: { addScene: (config: UnicornStudioConfig) => Promise<UnicornSceneInstance> } }).UnicornStudio;
-        if (!UnicornStudio) {
+        const unicornStudio = (window as { UnicornStudio?: { addScene: (config: unknown) => Promise<UnicornStudioScene> } })?.UnicornStudio;
+        if (!unicornStudio) {
           console.error('UnicornStudio not found on window');
           return;
         }
 
-        const unicornScene = await UnicornStudio.addScene({
+        const unicornScene = await unicornStudio.addScene({
           elementId: containerRef.current!.id,
           fps: 60,
           scale: 0.8,
           dpi: 1,
           filePath: '/unicorn-scene.json', // Point to our JSON file
           lazyLoad: false,
-          production: false,
           fixed: false,
           interactivity: {
             mouse: {
               disableMobile: false,
             },
           },
-        } as UnicornStudioConfig);
+        });
 
         console.log('Unicorn Studio scene initialized:', unicornScene);
         setScene(unicornScene);
@@ -103,7 +84,7 @@ export function UnicornScene({ className = "" }: UnicornSceneProps) {
   // Cleanup scene on unmount
   useEffect(() => {
     return () => {
-      if (scene) {
+      if (scene?.destroy) {
         console.log('Destroying Unicorn Studio scene');
         scene.destroy();
       }
