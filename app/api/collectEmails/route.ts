@@ -4,12 +4,17 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+interface EmailRequest {
+  email: string;
+}
+
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const body = await req.json() as EmailRequest;
+    const { email } = body;
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     }
 
     const result = await resend.contacts.create({
