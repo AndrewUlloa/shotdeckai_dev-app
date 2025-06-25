@@ -11,11 +11,33 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTranslations } from "@/lib/i18n-provider";
 import Script from 'next/script';
 
-// Type declaration for UnicornStudio
+// Type declarations for UnicornStudio
+interface UnicornStudioConfig {
+  elementId: string;
+  projectId?: string;
+  filePath?: string;
+  fps?: number;
+  scale?: number;
+  dpi?: number;
+  lazyLoad?: boolean;
+  altText?: string;
+  ariaLabel?: string;
+  interactivity?: {
+    mouse?: {
+      disableMobile?: boolean;
+    };
+  };
+}
+
+interface UnicornStudioScene {
+  destroy?: () => void;
+  resize?: () => void;
+}
+
 declare global {
   interface Window {
     UnicornStudio: {
-      addScene: (config: any) => Promise<any>;
+      addScene: (config: UnicornStudioConfig) => Promise<UnicornStudioScene>;
     };
   }
 }
@@ -64,7 +86,7 @@ export default function V2Test() {
   const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const t = useTranslations();
-  const unicornSceneRef = useRef<any>(null);
+  const unicornSceneRef = useRef<UnicornStudioScene | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
   const handleImageGenerated = (url: string) => {
@@ -83,13 +105,6 @@ export default function V2Test() {
     // Check if we're on desktop (768px and above)
     const isDesktop = window.innerWidth >= 768;
     if (!isDesktop) return;
-
-    // Type declaration for UnicornStudio
-    declare global {
-      interface Window {
-        UnicornStudio: any;
-      }
-    }
 
     const initializeScene = async () => {
       if (window.UnicornStudio && !unicornSceneRef.current) {
