@@ -8,16 +8,110 @@ interface ImageGenerationResult {
   images?: Array<{ url: string }>;
 }
 
-export async function POST(req: Request) {
+// Cloudflare utility functions
+async function checkCloudflareCache(prompt: string): Promise<string | null> {
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://shotdeck-image-cache.andrewsperspective.workers.dev';
+  
+  console.log('🔍 [CACHE CHECK] Checking Cloudflare cache for:', prompt);
+  console.log('🔍 [CACHE CHECK] Worker URL:', workerUrl);
+  
   try {
-    const { prompt } = await req.json();
+    const startTime = Date.now();
+    const response = await fetch(`${workerUrl}/api/checkCache`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
 
-    console.log("Received request:", { prompt });
+    const duration = Date.now() - startTime;
+
+    if (response.ok) {
+      const result = await response.json() as { cached: boolean; url?: string };
+      
+      if (result.cached && result.url) {
+        console.log('✅ [CACHE HIT] Found cached image in', duration + 'ms');
+        console.log('✅ [CACHE HIT] URL:', result.url);
+        return result.url;
+      } else {
+        console.log('❌ [CACHE MISS] No cached image found in', duration + 'ms');
+        return null;
+      }
+    } else {
+      console.error('⚠️ [CACHE ERROR] Response not ok:', response.status, response.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error('⚠️ [CACHE ERROR] Failed to check Cloudflare cache:', error);
+    return null;
+  }
+}
+
+async function uploadToCloudflare(prompt: string, falUrl: string): Promise<string> {
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://shotdeck-image-cache.andrewsperspective.workers.dev';
+  
+  console.log('💾 [UPLOAD] Starting upload to Cloudflare...');
+  console.log('💾 [UPLOAD] Prompt:', prompt);
+  console.log('💾 [UPLOAD] FAL URL:', falUrl);
+  console.log('💾 [UPLOAD] Worker URL:', workerUrl);
+  
+  try {
+    const startTime = Date.now();
+    const response = await fetch(`${workerUrl}/api/uploadImage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, falUrl })
+    });
+
+    const duration = Date.now() - startTime;
+
+    if (response.ok) {
+      const result = await response.json() as { persistentUrl: string };
+      console.log('✅ [UPLOAD SUCCESS] Uploaded to Cloudflare in', duration + 'ms');
+      console.log('✅ [UPLOAD SUCCESS] Persistent URL:', result.persistentUrl);
+      return result.persistentUrl;
+    } else {
+      const errorText = await response.text();
+      console.error('❌ [UPLOAD FAILED] Status:', response.status);
+      console.error('❌ [UPLOAD FAILED] Error:', errorText);
+      console.log('⚠️ [FALLBACK] Returning original FAL URL:', falUrl);
+      return falUrl;
+    }
+  } catch (error) {
+    console.error('❌ [UPLOAD ERROR] Exception during upload:', error);
+    console.log('⚠️ [FALLBACK] Returning original FAL URL:', falUrl);
+    return falUrl;
+  }
+}
+
+export async function POST(req: Request) {
+  const requestStartTime = Date.now();
+  
+  try {
+    const body = await req.json() as { prompt?: string };
+    const { prompt } = body;
+
+    console.log('\n🎬 [SHOTDECK API] === NEW IMAGE REQUEST ===');
+    console.log('🎬 [SHOTDECK API] Prompt:', prompt);
+    console.log('🎬 [SHOTDECK API] Timestamp:', new Date().toISOString());
 
     if (!prompt) {
+      console.error('❌ [SHOTDECK API] No prompt provided');
       return Response.json({ error: "Prompt is required" }, { status: 400 });
     }
 
+    // 🔍 STEP 1: Check Cloudflare cache first (same pattern as localStorage)
+    const cachedUrl = await checkCloudflareCache(prompt);
+    if (cachedUrl) {
+      const totalDuration = Date.now() - requestStartTime;
+      console.log('🚀 [SHOTDECK API] Cache hit! Returning in', totalDuration + 'ms');
+      console.log('🎬 [SHOTDECK API] === REQUEST COMPLETE (CACHED) ===\n');
+      return Response.json({ url: cachedUrl });
+    }
+
+    // 🎨 STEP 2: Generate with FAL (exactly as before)
+    console.log('🎨 [FAL GENERATION] Starting AI generation...');
+    const falStartTime = Date.now();
+    
     const result = await fal.subscribe("fal-ai/flux-1/schnell", {
       input: {
         prompt: `${prompt} {
@@ -58,22 +152,38 @@ export async function POST(req: Request) {
       logs: true,
       onQueueUpdate: (update) => {
         if (update.status === "IN_PROGRESS") {
-          update.logs.forEach((log) => console.log(log.message));
+          update.logs.forEach((log) => console.log('🎨 [FAL LOG]', log.message));
         }
       },
     }) as ImageGenerationResult;
 
-    console.log("API call result:", JSON.stringify(result, null, 2));
+    const falDuration = Date.now() - falStartTime;
+    console.log('✅ [FAL GENERATION] Completed in', falDuration + 'ms');
 
-    const imageUrl = result.images?.[0]?.url;
-    if (imageUrl) {
-      return Response.json({ url: imageUrl });
+    const falImageUrl = result.images?.[0]?.url;
+    if (falImageUrl) {
+      console.log('✅ [FAL GENERATION] Generated URL:', falImageUrl);
+      
+      // 💾 STEP 3: Upload to Cloudflare for persistence
+      const persistentUrl = await uploadToCloudflare(prompt, falImageUrl);
+      
+      const totalDuration = Date.now() - requestStartTime;
+      console.log('🚀 [SHOTDECK API] Total request time:', totalDuration + 'ms');
+      console.log('🚀 [SHOTDECK API] Final URL:', persistentUrl);
+      console.log('🎬 [SHOTDECK API] === REQUEST COMPLETE (NEW) ===\n');
+      
+      // Return the persistent URL instead of the temporary FAL URL
+      return Response.json({ url: persistentUrl });
     } else {
-      console.error("Unexpected API response structure:", result);
+      console.error('❌ [FAL GENERATION] No image URL in response');
+      console.error('❌ [FAL GENERATION] Response:', JSON.stringify(result, null, 2));
       return Response.json({ error: "Unexpected API response structure" }, { status: 500 });
     }
   } catch (error) {
-    console.error("Error in generateImage:", error);
+    const totalDuration = Date.now() - requestStartTime;
+    console.error('💥 [SHOTDECK API] Error after', totalDuration + 'ms');
+    console.error('💥 [SHOTDECK API] Error details:', error);
+    
     let errorMessage = "An unexpected error occurred";
     if (error instanceof Error) {
       errorMessage = error.message;

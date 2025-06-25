@@ -1,0 +1,21 @@
+{
+  "name": "shotdeck-image-cache-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for caching ShotDeckAI generated images",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "setup-kv": "wrangler kv:namespace create \"IMAGE_CACHE\"",
+    "setup-kv-preview": "wrangler kv:namespace create \"IMAGE_CACHE\" --preview"
+  },
+  "dependencies": {
+    "@fal-ai/serverless-client": "^0.15.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241024.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.78.12"
+  }
+} 
