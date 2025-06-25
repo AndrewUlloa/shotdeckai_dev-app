@@ -11,6 +11,13 @@ interface StoryInputProps {
   onGenerationStart?: () => void;
 }
 
+// API Response interface
+interface GenerateImageResponse {
+  url?: string;
+  error?: string;
+  [key: string]: unknown; // Allow other response properties
+}
+
 // Track typing rhythm patterns
 interface TypingRhythm {
   lastKeyTime: number;
@@ -263,7 +270,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
         throw new Error('Failed to generate image');
       }
       
-      const json = await res.json();
+      const json = await res.json() as GenerateImageResponse;
       if (json.url) {
         // Save to cache
         saveToCache(prompt, json.url);
