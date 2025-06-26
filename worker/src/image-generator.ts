@@ -138,11 +138,36 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
     // Use the official FAL client library for generation
     const result = await fal.subscribe("fal-ai/flux/schnell", {
       input: {
-        prompt: `Professional storyboard frame: ${prompt}. Cinematic composition, clean lines, professional film pre-production style`,
-        image_size: "landscape_16_9",
-        num_inference_steps: 4,
-        enable_safety_checker: false,
+        prompt: `${prompt} {
+          "style_name": "DigitalStoryboard_Teal",
+          "medium": "digital sketch (tablet, pressure-sensitive pen)",
+          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
+          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
+          "color_palette": {
+            "primary": ["#70A0A0", "#406C6C"],               // teal lines & borders
+            "accents": ["#DF7425"],                           // orange emphasis (props / cues)
+            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]// flat gray fills & paper white
+          },
+          "detail_level": "low-medium on characters & key props, very low on background",
+          "background": "plain white (no texture)",
+          "texture_overlay": "none (clean digital canvas)",
+          "lighting": "flat fill with sparse gray shadow blocks",
+          "ideal_subjects": [
+            "dialogue two-shots",
+            "dynamic action silhouettes",
+            "prop hand-offs",
+            "establishing wides"
+          ],
+          "file_format_hint": [
+            "PNG (transparent or white background)",
+            "PSD with separate line & fill layers"
+          ]
+        }`,
+        image_size: "landscape_4_3",
+        num_inference_steps: 8,
+        enable_safety_checker: true,
         num_images: 1,
+        seed: 42,
       },
       logs: true,
       onQueueUpdate: (update) => {
