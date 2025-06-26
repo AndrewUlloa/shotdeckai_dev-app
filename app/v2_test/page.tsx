@@ -11,6 +11,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTranslations } from "@/lib/i18n-provider";
 import Script from 'next/script';
 
+export const runtime = 'edge';
+
 // Type declarations for UnicornStudio
 interface UnicornStudioConfig {
   elementId: string;

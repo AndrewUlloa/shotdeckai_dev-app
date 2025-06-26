@@ -10,6 +10,7 @@ import PrelaunchSignup from "@/components/prelaunch-signup";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTranslations } from "@/lib/i18n-provider";
 
+export const runtime = 'edge';
 
 const queryClient = new QueryClient()
 

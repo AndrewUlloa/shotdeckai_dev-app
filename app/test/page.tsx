@@ -9,6 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "@/lib/i18n-provider";
 
+export const runtime = 'edge';
+
 const queryClient = new QueryClient()
 
 // Social media links
