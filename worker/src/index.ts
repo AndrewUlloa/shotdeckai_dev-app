@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { uploadToCloudflareImages } from './image-uploader'
-import { generateImage } from './image-generator'
+import { generateStoryboardImage } from './image-generator'
 import type { Env } from './types'
 
 export type { Env } from './types'
@@ -79,6 +79,16 @@ export default {
       else if (url.pathname === '/api/generateImage' && request.method === 'POST') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: generateImage', {}, env);
         response = await handleGenerateImage(request, env, corsHeaders, requestId);
+      }
+      // Semantic Cache: Manually expand cache for a prompt
+      else if (url.pathname === '/api/expandCache' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: expandCache', {}, env);
+        response = await handleExpandCache(request, env, corsHeaders, requestId);
+      }
+      // Semantic Cache: Get cache performance statistics
+      else if (url.pathname === '/api/cacheStats' && request.method === 'GET') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: cacheStats', {}, env);
+        response = await handleCacheStats(request, env, corsHeaders, requestId);
       }
       // Simple status endpoint
       else if (url.pathname === '/') {
@@ -281,15 +291,13 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
   }
 }
 
-// Full image generation: check cache, generate with FAL, upload to Cloudflare
+// Full image generation with semantic cache integration
 async function handleGenerateImage(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
-  const startTime = Date.now();
-  
   try {
     const body = await request.json() as { prompt?: string }
     const { prompt } = body
 
-    logWithContext('info', requestId, '🎨 [GENERATE] Starting full generation process', { prompt }, env);
+    logWithContext('info', requestId, '🎨 [GENERATE] Starting semantic-enabled generation', { prompt }, env);
 
     if (!prompt || typeof prompt !== 'string') {
       logWithContext('warn', requestId, '❌ [GENERATE] Invalid prompt provided', { prompt }, env);
@@ -299,109 +307,159 @@ async function handleGenerateImage(request: Request, env: Env, corsHeaders: Reco
       })
     }
 
-    // Step 1: Check cache first
-    const cacheKey = prompt.trim().toLowerCase()
-    const kvStartTime = Date.now();
-    const cachedImageData = await env.IMAGE_CACHE.get(cacheKey)
-    const kvDuration = Date.now() - kvStartTime;
+    // Use the new semantic cache-enabled generation function
+    const response = await generateStoryboardImage(prompt, env, requestId);
+    const result = await response.json();
     
-    if (cachedImageData) {
-      const imageData = JSON.parse(cachedImageData)
-      const totalDuration = Date.now() - startTime;
-      
-      logWithContext('info', requestId, '✅ [GENERATE] Cache HIT - returning cached image', {
-        cacheKey,
-        kvDuration,
-        totalDuration,
-        imageId: imageData.cloudflareImageId
-      }, env);
-      
+    // Add CORS headers to the response
+    return new Response(JSON.stringify(result), {
+      status: response.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [GENERATE] Generation failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to generate image",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Manually expand semantic cache for a prompt and image
+async function handleExpandCache(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    const body = await request.json() as { prompt?: string; imageUrl?: string; cloudflareImageId?: string }
+    const { prompt, imageUrl, cloudflareImageId } = body
+
+    logWithContext('info', requestId, '🧠 [EXPAND] Manual cache expansion requested', { prompt }, env);
+
+    if (!prompt || !imageUrl || !cloudflareImageId) {
       return new Response(JSON.stringify({ 
-        url: imageData.persistentUrl
-      }), {
+        error: "Prompt, imageUrl, and cloudflareImageId are required" 
+      }), { 
+        status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    logWithContext('info', requestId, '❌ [GENERATE] Cache MISS - generating new image', {
-      cacheKey,
-      kvDuration
-    }, env);
+    // Import the semantic cache functions
+    const { expandSemanticCache } = await import('./semantic-cache');
+    
+    // Trigger expansion
+    await expandSemanticCache(prompt, imageUrl, cloudflareImageId, env, requestId);
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: "Semantic cache expansion completed",
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
-    // Step 2: Generate with FAL AI
-    if (!env.FAL_KEY) {
-      logWithContext('error', requestId, '❌ [GENERATE] FAL_KEY not configured', {}, env);
-      return new Response(JSON.stringify({ error: "Image generation service not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [EXPAND] Cache expansion failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to expand cache",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Get cache performance statistics
+async function handleCacheStats(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    logWithContext('info', requestId, '📊 [STATS] Cache statistics requested', {}, env);
+
+    // List all cache keys to analyze
+    const keys = await env.IMAGE_CACHE.list();
+    const allEntries = [];
+    
+    // Fetch a sample of cache entries for analysis
+    const sampleSize = Math.min(keys.keys.length, 100); // Limit to avoid timeouts
+    for (let i = 0; i < sampleSize; i++) {
+      const key = keys.keys[i];
+      const value = await env.IMAGE_CACHE.get(key.name);
+      if (value) {
+        try {
+          const entry = JSON.parse(value);
+          allEntries.push({
+            key: key.name,
+            ...entry
+          });
+        } catch {
+          // Skip invalid entries
+        }
+      }
     }
 
-    logWithContext('info', requestId, '🎨 [GENERATE] Starting FAL AI generation', { prompt }, env);
-    const falStartTime = Date.now();
+    // Analyze cache statistics
+    const stats = {
+      totalEntries: keys.keys.length,
+      analyzedEntries: allEntries.length,
+      semanticVariations: allEntries.filter(e => e.isSemanticVariation).length,
+      originalPrompts: allEntries.filter(e => !e.isSemanticVariation).length,
+      clusters: {},
+      oldestEntry: allEntries.length > 0 ? Math.min(...allEntries.map(e => e.timestamp || 0)) : null,
+      newestEntry: allEntries.length > 0 ? Math.max(...allEntries.map(e => e.timestamp || 0)) : null,
+      averageAge: 0
+    };
 
-    // Use existing generateImage function
-    const falImageUrl = await generateImage(prompt, env);
-    const falDuration = Date.now() - falStartTime;
-
-    logWithContext('info', requestId, '✅ [GENERATE] FAL AI generation complete', {
-      duration: falDuration,
-      falImageUrl
-    }, env);
-
-    // Step 3: Upload to Cloudflare Images
-    logWithContext('info', requestId, '💾 [GENERATE] Uploading to Cloudflare Images', {}, env);
-    const uploadStartTime = Date.now();
-    
-    const cloudflareImageId = await uploadToCloudflareImages(falImageUrl, env)
-    const uploadDuration = Date.now() - uploadStartTime;
-
-    // Step 4: Cache the result
-    const persistentUrl = `https://imagedelivery.net/${env.CLOUDFLARE_IMAGE_ACCOUNT_HASH}/${cloudflareImageId}/public`
-    const cacheData = {
-      originalFalUrl: falImageUrl,
-      cloudflareImageId: cloudflareImageId,
-      persistentUrl: persistentUrl,
-      timestamp: Date.now()
+    // Calculate cluster statistics
+    const clusterCounts: Record<string, number> = {};
+    for (const entry of allEntries) {
+      if (entry.semanticCluster) {
+        clusterCounts[entry.semanticCluster] = (clusterCounts[entry.semanticCluster] || 0) + 1;
+      }
     }
+    stats.clusters = clusterCounts;
 
-    const cacheStartTime = Date.now();
-    await env.IMAGE_CACHE.put(cacheKey, JSON.stringify(cacheData))
-    const cacheDuration = Date.now() - cacheStartTime;
-    
-    const totalDuration = Date.now() - startTime;
-    
-    logWithContext('info', requestId, '🎉 [GENERATE] Full generation complete', {
-      cacheKey,
-      falDuration,
-      uploadDuration,
-      cacheDuration,
-      totalDuration,
-      cloudflareImageId,
-      persistentUrl
+    // Calculate average age
+    const now = Date.now();
+    const totalAge = allEntries.reduce((sum, entry) => {
+      return sum + (now - (entry.timestamp || 0));
+    }, 0);
+    stats.averageAge = allEntries.length > 0 ? totalAge / allEntries.length : 0;
+
+    logWithContext('info', requestId, '📊 [STATS] Cache statistics calculated', {
+      totalEntries: stats.totalEntries,
+      semanticVariations: stats.semanticVariations,
+      clusterCount: Object.keys(stats.clusters).length
     }, env);
 
     return new Response(JSON.stringify({ 
-      url: persistentUrl
+      success: true,
+      stats,
+      requestId
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+    });
 
   } catch (error) {
-    const totalDuration = Date.now() - startTime;
-    
-    logWithContext('error', requestId, '💥 [GENERATE] Generation failed', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      duration: totalDuration
+    logWithContext('error', requestId, '💥 [STATS] Statistics calculation failed', {
+      error: error instanceof Error ? error.message : String(error)
     }, env);
     
-    let errorMessage = "Failed to generate image"
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to calculate cache statistics",
+      requestId 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
