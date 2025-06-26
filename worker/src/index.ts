@@ -1,20 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { uploadToCloudflareImages } from './image-uploader'
+import { generateImage } from './image-generator'
+import type { Env } from './types'
 
-export interface Env {
-  FAL_KEY: string
-  CLOUDFLARE_ACCOUNT_ID: string
-  CLOUDFLARE_API_TOKEN: string
-  CLOUDFLARE_IMAGE_ACCOUNT_HASH: string
-  IMAGE_CACHE: KVNamespace
-  LOG_LEVEL?: string
-  ENABLE_REQUEST_LOGGING?: string
-}
-
-interface ImageGenerationResult {
-  images?: Array<{ url: string }>;
-}
+export type { Env } from './types'
 
 // Enhanced logging utility for Workers Logs dashboard
 function logWithContext(level: 'info' | 'warn' | 'error', requestId: string, message: string, metadata?: Record<string, unknown>, env?: Env) {
@@ -350,66 +340,9 @@ async function handleGenerateImage(request: Request, env: Env, corsHeaders: Reco
     logWithContext('info', requestId, '🎨 [GENERATE] Starting FAL AI generation', { prompt }, env);
     const falStartTime = Date.now();
 
-    // Call FAL AI API directly (since we can't use the SDK in worker)
-    const falResponse = await fetch('https://fal.run/fal-ai/flux-1/schnell', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${env.FAL_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: `${prompt} {
-          "style_name": "DigitalStoryboard_Teal",
-          "medium": "digital sketch (tablet, pressure-sensitive pen)",
-          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
-          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
-          "color_palette": {
-            "primary": ["#70A0A0", "#406C6C"],
-            "accents": ["#DF7425"],
-            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]
-          },
-          "detail_level": "low-medium on characters & key props, very low on background",
-          "background": "plain white (no texture)",
-          "texture_overlay": "none (clean digital canvas)",
-          "lighting": "flat fill with sparse gray shadow blocks"
-        }`,
-        image_size: "landscape_4_3",
-        num_inference_steps: 8,
-        enable_safety_checker: true,
-        num_images: 1,
-        seed: 42
-      })
-    });
-
+    // Use existing generateImage function
+    const falImageUrl = await generateImage(prompt, env);
     const falDuration = Date.now() - falStartTime;
-
-    if (!falResponse.ok) {
-      logWithContext('error', requestId, '❌ [GENERATE] FAL AI generation failed', {
-        status: falResponse.status,
-        statusText: falResponse.statusText,
-        duration: falDuration
-      }, env);
-      
-      return new Response(JSON.stringify({ error: "Image generation failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    const falResult = await falResponse.json() as ImageGenerationResult;
-    const falImageUrl = falResult.images?.[0]?.url;
-
-    if (!falImageUrl) {
-      logWithContext('error', requestId, '❌ [GENERATE] No image URL in FAL response', {
-        falResult,
-        duration: falDuration
-      }, env);
-      
-      return new Response(JSON.stringify({ error: "No image generated" }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
 
     logWithContext('info', requestId, '✅ [GENERATE] FAL AI generation complete', {
       duration: falDuration,

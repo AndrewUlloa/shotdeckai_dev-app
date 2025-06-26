@@ -1,7 +1,4 @@
-interface CloudflareEnv {
-  CLOUDFLARE_ACCOUNT_ID: string
-  CLOUDFLARE_API_TOKEN: string
-}
+import type { Env } from './types'
 
 interface UploadResponse {
   result: {
@@ -12,7 +9,7 @@ interface UploadResponse {
   errors: unknown[]
 }
 
-export async function uploadToCloudflareImages(imageUrl: string, env: CloudflareEnv): Promise<string> {
+export async function uploadToCloudflareImages(imageUrl: string, env: Env): Promise<string> {
   console.log('Uploading image to Cloudflare Images:', imageUrl)
   
   try {

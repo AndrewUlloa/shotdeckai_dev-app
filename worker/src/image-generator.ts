@@ -1,8 +1,5 @@
 import * as fal from "@fal-ai/serverless-client";
-
-interface Env {
-  FAL_KEY: string
-}
+import type { Env } from './types'
 
 interface ImageGenerationResult {
   images?: Array<{ url: string }>;
