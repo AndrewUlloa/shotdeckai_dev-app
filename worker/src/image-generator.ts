@@ -120,7 +120,7 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
       
       return new Response(JSON.stringify({
         success: true,
-        imageUrl: cachedEntry.persistentUrl,
+        url: cachedEntry.persistentUrl,
         cached: true,
         semantic: true,
         originalPrompt: cachedEntry.originalPrompt,
@@ -228,7 +228,7 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
     
     return new Response(JSON.stringify({
       success: true,
-      imageUrl: persistentUrl,
+      url: persistentUrl,
       cached: false,
       semantic: false,
       requestId,
