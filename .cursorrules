@@ -1,0 +1,89 @@
+# ShotDeckAI Cursor Rules
+
+## API Route Guidelines
+
+### NEVER use Edge Runtime
+- Do NOT add `export const runtime = "edge"` to any API routes
+- Edge runtime causes build failures with third-party libraries like Resend and FAL AI
+- Always use default Node.js runtime for API routes in app/api/*
+
+### AVOID Module-Level Initialization
+- Do NOT initialize third-party clients at module level with environment variables
+- Initialize clients inside function bodies to avoid build-time errors
+- Always validate environment variables before using them
+
+```typescript
+// ❌ BAD - Module-level initialization
+const resend = new Resend(process.env.RESEND_API_KEY);
+fal.config({ credentials: process.env.FAL_KEY });
+
+// ✅ GOOD - Function-level initialization
+export async function POST(req: Request) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Service not configured' }, { status: 500 });
+  }
+  const resend = new Resend(apiKey);
+  // ... rest of function
+}
+```
+
+### TypeScript Requirements
+- Always define interfaces for request/response types
+- Use proper type annotations for all function parameters
+- Avoid using `any` type - create specific interfaces instead
+
+### API Route Structure
+```typescript
+// ✅ GOOD - No edge runtime
+export async function POST(req: Request) {
+  // implementation
+}
+
+// ❌ BAD - Never use edge runtime
+export const runtime = "edge"; // FORBIDDEN
+```
+
+## General Code Standards
+
+### Error Handling
+- Always wrap async operations in try-catch blocks
+- Log errors with descriptive prefixes like `🔍 [CACHE CHECK]` or `❌ [ERROR]`
+- Provide fallback behavior when external services fail
+
+### Environment Variables
+- Always provide fallback values for optional environment variables
+- Validate required environment variables at startup
+- Use type assertion for required env vars: `process.env.REQUIRED_VAR as string`
+
+### Imports and Dependencies
+- Use ES6 imports consistently
+- Group imports: built-in modules, third-party, local imports
+- Avoid importing entire libraries when only specific functions are needed
+
+### Comments and Logging
+- Use emoji prefixes for log categories: 🎬 [API], 🔍 [CACHE], 💾 [UPLOAD], ❌ [ERROR]
+- Include timing information in performance-critical operations
+- Document complex business logic with inline comments
+
+## Next.js Specific Rules
+
+### File Structure
+- Place API routes in app/api/ directory
+- Use route.ts naming convention for API routes
+- Keep components in components/ directory with proper organization
+
+### Performance
+- Implement caching strategies for expensive operations
+- Use progressive enhancement for image generation
+- Provide loading states and fallbacks
+
+### Build Compatibility
+- Test all API routes work in both development and production
+- Ensure third-party libraries are compatible with Next.js build process
+- Avoid server-side only code in client components
+
+## Security
+- Validate all user inputs at the API boundary
+- Use environment variables for sensitive configuration
+- Implement proper error responses without leaking sensitive information 

@@ -1,9 +1,5 @@
 import * as fal from "@fal-ai/serverless-client";
 
-fal.config({
-  credentials: process.env.FAL_KEY,
-});
-
 interface ImageGenerationResult {
   images?: Array<{ url: string }>;
 }
@@ -87,6 +83,17 @@ export async function POST(req: Request) {
   const requestStartTime = Date.now();
   
   try {
+    // Configure FAL client inside the function to avoid build-time issues
+    const falKey = process.env.FAL_KEY;
+    if (!falKey) {
+      console.error('❌ [SHOTDECK API] FAL_KEY not configured');
+      return Response.json({ error: "Image generation service not configured" }, { status: 500 });
+    }
+
+    fal.config({
+      credentials: falKey,
+    });
+
     const body = await req.json() as { prompt?: string };
     const { prompt } = body;
 
