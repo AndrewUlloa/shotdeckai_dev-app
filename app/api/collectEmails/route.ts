@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+export const runtime = 'edge';
+
 interface EmailRequest {
   email: string;
 }
@@ -23,6 +25,7 @@ export async function POST(req: Request) {
     }
 
     const resend = new Resend(resendApiKey);
+
     const body = await req.json() as EmailRequest;
     const { email } = body;
 
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     }
 
-    console.log('📧 [EMAIL API] Adding email to audience:', email);
+    console.log('📧 [EMAIL API] Processing email subscription for:', email);
 
     const result = await resend.contacts.create({
       email,
@@ -38,10 +41,10 @@ export async function POST(req: Request) {
       unsubscribed: false,
     });
 
-    console.log('✅ [EMAIL API] Successfully added contact');
+    console.log('✅ [EMAIL API] Successfully added contact:', email);
     return NextResponse.json(result);
   } catch (error) {
-    console.error('❌ [EMAIL API] Error:', error);
-    return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
+    console.error('❌ [EMAIL API] Resend API Error:', error);
+    return NextResponse.json({ error: 'Failed to subscribe email' }, { status: 500 });
   }
 }

@@ -1,5 +1,7 @@
 import * as fal from "@fal-ai/serverless-client";
 
+export const runtime = 'edge';
+
 interface ImageGenerationResult {
   images?: Array<{ url: string }>;
 }
