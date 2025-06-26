@@ -7,10 +7,6 @@ interface ImageGenerationResult {
   images?: Array<{ url: string }>;
 }
 
-interface FalResponse {
-  images?: Array<{ url: string }>;
-}
-
 // Enhanced logging function
 function log(level: 'info' | 'warn' | 'error', requestId: string, message: string, metadata?: Record<string, unknown>, env?: Env) {
   const enableLogging = env?.ENABLE_REQUEST_LOGGING !== 'false';
@@ -132,39 +128,35 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
     
     log('info', requestId, '🔍 [CACHE MISS] No cached image found, generating new one', { prompt }, env)
     
-    // ... existing code for FAL AI generation ...
+    // Configure FAL client with the API key
+    fal.config({
+      credentials: env.FAL_KEY,
+    });
+
+    log('info', requestId, '🎨 [FAL] Starting image generation with official client', { prompt }, env)
     
-    const falResponse = await fetch('https://queue.fal.run/fal-ai/flux/schnell', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${env.FAL_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Use the official FAL client library for generation
+    const result = await fal.subscribe("fal-ai/flux/schnell", {
+      input: {
         prompt: `Professional storyboard frame: ${prompt}. Cinematic composition, clean lines, professional film pre-production style`,
-        image_size: 'landscape_16_9',
+        image_size: "landscape_16_9",
         num_inference_steps: 4,
-        enable_safety_checker: false
-      })
-    })
+        enable_safety_checker: false,
+        num_images: 1,
+      },
+      logs: true,
+      onQueueUpdate: (update) => {
+        if (update.status === "IN_PROGRESS") {
+          log('info', requestId, '🎨 [FAL PROGRESS] Generation in progress', { status: update.status }, env)
+        }
+      },
+    }) as ImageGenerationResult;
+
+    log('info', requestId, '🎨 [FAL RESPONSE] Received response from FAL', { 
+      hasImages: !!result.images,
+      imageCount: result.images?.length || 0 
+    }, env)
     
-    if (!falResponse.ok) {
-      log('error', requestId, '❌ [FAL ERROR] Generation failed', {
-        status: falResponse.status,
-        statusText: falResponse.statusText
-      }, env)
-      
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Image generation failed',
-        requestId
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    }
-    
-    const result = await falResponse.json() as FalResponse
     const imageUrl = result.images?.[0]?.url
     
     if (!imageUrl) {
