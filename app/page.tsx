@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { StoryboardFrameComponent } from "@/components/storyboard-frame";
 import { StoryInput } from "@/components/story-input";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PrelaunchSignup from "@/components/prelaunch-signup";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -58,15 +58,32 @@ export default function Home() {
   const t = useTranslations();
 
   const handleImageGenerated = (url: string) => {
+    console.log('🎨 [MAIN PAGE] New image received:', url);
+    console.log('🖼️ [MAIN PAGE] Total images generated this session:', generatedImageUrls.length + 1);
     setGeneratedImageUrls([...generatedImageUrls, url]);
     setIsGenerating(false);
   };
 
   const handleGenerationStart = () => {
+    console.log('⏳ [MAIN PAGE] Image generation started');
     setIsGenerating(true);
   };
 
+  // Log when generating state changes
+  useEffect(() => {
+    if (isGenerating) {
+      console.log('🔄 [MAIN PAGE] UI switched to loading state');
+    } else {
+      console.log('✅ [MAIN PAGE] UI switched to ready state');
+    }
+  }, [isGenerating]);
 
+  // Log when component mounts
+  useEffect(() => {
+    console.log('🎉 [SHOTDECKAI] Main page loaded successfully');
+    console.log('🌟 [SHOTDECKAI] Welcome to ShotDeckAI - Your AI-powered storyboard generator');
+    console.log('💡 [SHOTDECKAI] Open browser console to see real-time generation logs');
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

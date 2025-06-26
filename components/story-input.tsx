@@ -42,14 +42,25 @@ const getImageCache = (): ImageCache => {
     const expiry = localStorage.getItem(CACHE_EXPIRY_KEY);
     if (expiry && Date.now() > parseInt(expiry)) {
       // Cache expired, clear it
+      console.log('🧹 [CACHE CLEANUP] Cache expired, clearing localStorage');
       localStorage.removeItem(CACHE_KEY);
       localStorage.removeItem(CACHE_EXPIRY_KEY);
       return {};
     }
     
     const cache = localStorage.getItem(CACHE_KEY);
-    return cache ? JSON.parse(cache) : {};
-  } catch {
+    const parsedCache = cache ? JSON.parse(cache) : {};
+    const cacheSize = Object.keys(parsedCache).length;
+    
+    if (cacheSize > 0) {
+      console.log('📚 [CACHE LOAD] Loaded cache with', cacheSize, 'entries');
+    } else {
+      console.log('📚 [CACHE LOAD] Cache is empty');
+    }
+    
+    return parsedCache;
+  } catch (error) {
+    console.error('❌ [CACHE ERROR] Failed to load cache:', error);
     return {};
   }
 };
@@ -57,22 +68,36 @@ const getImageCache = (): ImageCache => {
 const saveToCache = (prompt: string, imageUrl: string) => {
   try {
     const cache = getImageCache();
-    cache[prompt.trim().toLowerCase()] = imageUrl;
+    const normalizedPrompt = prompt.trim().toLowerCase();
+    cache[normalizedPrompt] = imageUrl;
     
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    console.log('💾 [CACHE SAVE] Saved to localStorage, total entries:', Object.keys(cache).length);
     
     // Set expiry if not already set
     if (!localStorage.getItem(CACHE_EXPIRY_KEY)) {
-      localStorage.setItem(CACHE_EXPIRY_KEY, (Date.now() + CACHE_DURATION).toString());
+      const expiryTime = Date.now() + CACHE_DURATION;
+      localStorage.setItem(CACHE_EXPIRY_KEY, expiryTime.toString());
+      console.log('⏰ [CACHE EXPIRY] Set cache expiry to:', new Date(expiryTime).toLocaleString());
     }
   } catch (error) {
-    console.error('Failed to save to cache:', error);
+    console.error('❌ [CACHE ERROR] Failed to save to cache:', error);
   }
 };
 
 const getCachedImage = (prompt: string): string | null => {
   const cache = getImageCache();
-  return cache[prompt.trim().toLowerCase()] || null;
+  const normalizedPrompt = prompt.trim().toLowerCase();
+  const cachedUrl = cache[normalizedPrompt] || null;
+  
+  if (cachedUrl) {
+    console.log('🔍 [BROWSER CACHE] Cache HIT for:', normalizedPrompt);
+    console.log('🔍 [BROWSER CACHE] Returning cached URL:', cachedUrl);
+  } else {
+    console.log('🔍 [BROWSER CACHE] Cache MISS for:', normalizedPrompt);
+  }
+  
+  return cachedUrl;
 };
 
 export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputProps) {
@@ -107,6 +132,9 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     const rhythm = rhythmRef.current;
     const timeSinceLastKey = now - rhythm.lastKeyTime;
     
+    console.log('⌨️ [USER INPUT] Prompt updated:', newPrompt);
+    console.log('⌨️ [USER INPUT] Time since last key:', timeSinceLastKey + 'ms');
+    
     // Keep a rolling window of key intervals (last 10)
     rhythm.keyIntervals.push(timeSinceLastKey);
     if (rhythm.keyIntervals.length > 10) {
@@ -121,10 +149,12 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     if (lengthDiff < 0) {
       rhythm.deletionStreak += Math.abs(lengthDiff);
       rhythm.isInDeletionMode = true;
+      console.log('🗑️ [USER BEHAVIOR] Deletion detected, streak:', rhythm.deletionStreak);
     } else if (lengthDiff > 0) {
       // User started typing again after deletion
       if (rhythm.isInDeletionMode && rhythm.deletionStreak > 5) {
         // Major deletion followed by typing = rethinking
+        console.log('🤔 [USER BEHAVIOR] Major editing detected, switching to editing mode');
         setUserState('editing');
       } else {
         rhythm.deletionStreak = 0;
@@ -144,28 +174,35 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       if (rhythm.deletionStreak > 20) {
         delay = 4000; // Major rethinking - 4 seconds
         setUserState('editing');
+        console.log('⏱️ [TIMING] Major rethinking detected, delay: 4s');
       } else if (rhythm.deletionStreak > 5) {
         delay = 2500; // Moderate editing - 2.5 seconds
         setUserState('editing');
+        console.log('⏱️ [TIMING] Moderate editing detected, delay: 2.5s');
       } else {
         delay = 1500; // Minor typo fix - 1.5 seconds
+        console.log('⏱️ [TIMING] Minor editing detected, delay: 1.5s');
       }
     } else if (newPrompt.length < 15) {
       // Very short prompt - user just starting
       delay = 3000; // 3 seconds
       setUserState('thinking');
+      console.log('⏱️ [TIMING] Short prompt detected, delay: 3s');
     } else if (avgInterval < 100 && timeSinceLastKey < 200) {
       // Fast, continuous typing
       delay = 2000; // 2 seconds
       setUserState('typing');
+      console.log('⏱️ [TIMING] Fast typing detected, delay: 2s');
     } else if (timeSinceLastKey > 1000) {
       // User paused for over a second before this keystroke
       delay = 2500; // 2.5 seconds - they might be thinking
       setUserState('thinking');
+      console.log('⏱️ [TIMING] User pause detected, delay: 2.5s');
     } else {
       // Normal typing rhythm
       delay = 1800; // 1.8 seconds
       setUserState('typing');
+      console.log('⏱️ [TIMING] Normal typing rhythm, delay: 1.8s');
     }
     
     return delay;
@@ -177,6 +214,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      console.log('⏰ [TIMEOUT] Cleared previous timeout');
     }
     
     // Don't generate for empty prompts
@@ -185,20 +223,24 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       setUserState('typing');
       rhythmRef.current.deletionStreak = 0;
       rhythmRef.current.isInDeletionMode = false;
+      console.log('🚫 [INPUT] Empty prompt, generation cancelled');
       return;
     }
     
     // INSTANT GENERATION FOR FIRST INPUT WITH 2 WORDS
     if (isFirstInput && hasTwoWords(newPrompt)) {
+      console.log('⚡ [FIRST INPUT] Two words detected, instant generation triggered');
       setUserState('settled');
       
       // Check cache first
       const cachedImage = getCachedImage(newPrompt);
       if (cachedImage) {
+        console.log('🎯 [FIRST INPUT] Using cached image');
         onImageGenerated(cachedImage);
         setLastGeneratedPrompt(newPrompt.trim().toLowerCase());
         setIsFirstInput(false);
       } else {
+        console.log('🎨 [FIRST INPUT] No cache, triggering generation');
         setShouldGenerate(true);
         setIsFirstInput(false);
       }
@@ -209,7 +251,10 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     const delay = analyzeUserIntent(newPrompt);
     
     // Set new timeout
+    console.log('⏰ [TIMEOUT] Setting new timeout:', delay + 'ms');
     timeoutRef.current = setTimeout(() => {
+      console.log('⏰ [TIMEOUT] Timeout triggered, user has stopped typing');
+      
       // After the delay, user has stopped typing - reset deletion mode
       rhythmRef.current.isInDeletionMode = false;
       rhythmRef.current.deletionStreak = 0;
@@ -222,11 +267,15 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       
       if (cachedImage && normalizedPrompt !== lastGeneratedPrompt) {
         // Use cached image if it's different from the last one we showed
+        console.log('🎯 [SETTLED] Using cached image for new prompt');
         onImageGenerated(cachedImage);
         setLastGeneratedPrompt(normalizedPrompt);
       } else if (!cachedImage) {
         // Generate new image
+        console.log('🎨 [SETTLED] No cache found, triggering generation');
         setShouldGenerate(true);
+      } else {
+        console.log('🔄 [SETTLED] Same as last prompt, no action needed');
       }
       // If it's the same as lastGeneratedPrompt, do nothing (image already shown)
       
@@ -247,6 +296,19 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
 
   // Auto-focus the textarea when component mounts
   useEffect(() => {
+    console.log('🚀 [SHOTDECKAI] Story input component initialized');
+    console.log('🎯 [SHOTDECKAI] Ready for image generation with intelligent caching');
+    
+    // Log initial cache state
+    const cache = getImageCache();
+    const cacheSize = Object.keys(cache).length;
+    if (cacheSize > 0) {
+      console.log('💾 [SHOTDECKAI] Found existing cache with', cacheSize, 'stored images');
+      console.log('💾 [SHOTDECKAI] Cached prompts:', Object.keys(cache));
+    } else {
+      console.log('💾 [SHOTDECKAI] Starting with empty cache');
+    }
+    
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
@@ -255,37 +317,69 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const { isLoading, error } = useQuery({
     queryKey: ['generateImage', prompt, shouldGenerate], // Add shouldGenerate to force refetch
     queryFn: async () => {
+      console.log('🚀 [API CALL] Starting image generation for:', prompt);
+      const startTime = Date.now();
+      
       // Call generation start callback when query starts
       onGenerationStart?.();
       
-      const res = await fetch('/api/generateImage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
-      
-      if (!res.ok) {
-        throw new Error('Failed to generate image');
-      }
-      
-      const json = await res.json() as GenerateImageResponse;
-      if (json.url) {
-        // Save to cache
-        saveToCache(prompt, json.url);
+      try {
+        const res = await fetch('/api/generateImage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt }),
+        });
         
-        onImageGenerated(json.url);
-        setLastGeneratedPrompt(prompt.trim().toLowerCase());
-        setShouldGenerate(false);
-        setUserState('settled');
+        const duration = Date.now() - startTime;
+        console.log('🌐 [API CALL] Response received in:', duration + 'ms');
+        
+        if (!res.ok) {
+          console.error('❌ [API ERROR] HTTP error:', res.status, res.statusText);
+          throw new Error('Failed to generate image');
+        }
+        
+        const json = await res.json() as GenerateImageResponse;
+        console.log('📦 [API RESPONSE] Response data:', json);
+        
+        if (json.url) {
+          console.log('💾 [CACHE SAVE] Saving to browser cache:', prompt, '→', json.url);
+          // Save to cache
+          saveToCache(prompt, json.url);
+          
+          console.log('✅ [GENERATION COMPLETE] Image generated and cached successfully');
+          onImageGenerated(json.url);
+          setLastGeneratedPrompt(prompt.trim().toLowerCase());
+          setShouldGenerate(false);
+          setUserState('settled');
+        } else {
+          console.error('❌ [API ERROR] No URL in response:', json);
+        }
+        return json;
+      } catch (err) {
+        console.error('❌ [API ERROR] Generation failed:', err);
+        throw err;
       }
-      return json;
     },
     enabled: shouldGenerate && !!prompt.trim(),
     staleTime: Infinity,
     retry: 1,
   });
+
+  // Log when loading state changes
+  useEffect(() => {
+    if (isLoading) {
+      console.log('⏳ [LOADING] Image generation in progress...');
+    }
+  }, [isLoading]);
+
+  // Log errors
+  useEffect(() => {
+    if (error) {
+      console.error('❌ [ERROR] Generation error:', error);
+    }
+  }, [error]);
 
   // Get status message based on user state
   // Kept for future use - currently hidden from UI
