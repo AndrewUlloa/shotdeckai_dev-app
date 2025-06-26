@@ -12,3 +12,8 @@ account_id = "427699ca78bfbbfa80d62636b0d962c0"
 binding = "IMAGE_CACHE"
 preview_id = "3a2e2b9bdb0d4be3b182c0a6ef10711a"
 id = "0bee46597d0f4ad697d0040789273d2c"
+
+# Environment variables for enhanced logging
+[vars]
+LOG_LEVEL = "info"
+ENABLE_REQUEST_LOGGING = "true"

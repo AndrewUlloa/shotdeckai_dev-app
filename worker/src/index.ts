@@ -8,12 +8,41 @@ export interface Env {
   CLOUDFLARE_API_TOKEN: string
   CLOUDFLARE_IMAGE_ACCOUNT_HASH: string
   IMAGE_CACHE: KVNamespace
+  LOG_LEVEL?: string
+  ENABLE_REQUEST_LOGGING?: string
+}
+
+// Enhanced logging utility for Workers Logs dashboard
+function logWithContext(level: 'info' | 'warn' | 'error', requestId: string, message: string, metadata?: Record<string, unknown>, env?: Env) {
+  const enableLogging = env?.ENABLE_REQUEST_LOGGING !== 'false';
+  
+  if (!enableLogging) return;
+  
+  const timestamp = new Date().toISOString();
+  const logEntry = {
+    timestamp,
+    level,
+    requestId,
+    message,
+    service: 'shotdeck-image-cache',
+    ...(metadata && { metadata })
+  };
+  
+  // Use structured logging for Workers Logs dashboard
+  if (level === 'error') {
+    console.error(JSON.stringify(logEntry));
+  } else if (level === 'warn') {
+    console.warn(JSON.stringify(logEntry));
+  } else {
+    console.log(JSON.stringify(logEntry));
+  }
 }
 
 export default {
-  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
     const requestId = Math.random().toString(36).substring(7);
+    const requestStartTime = Date.now();
     
     // Add CORS headers for calls from your Next.js app
     const corsHeaders = {
@@ -22,39 +51,71 @@ export default {
       'Access-Control-Allow-Headers': 'Content-Type',
     }
 
-    console.log(`\n🔧 [WORKER ${requestId}] === NEW REQUEST ===`);
-    console.log(`🔧 [WORKER ${requestId}] Method: ${request.method}`);
-    console.log(`🔧 [WORKER ${requestId}] Path: ${url.pathname}`);
-    console.log(`🔧 [WORKER ${requestId}] Timestamp: ${new Date().toISOString()}`);
+    // Enhanced request logging for Workers Logs
+    logWithContext('info', requestId, '🔧 [WORKER] New request started', {
+      method: request.method,
+      path: url.pathname,
+      userAgent: request.headers.get('User-Agent'),
+      cf: {
+        colo: request.cf?.colo,
+        country: request.cf?.country,
+        ray: request.cf?.ray
+      }
+    }, env);
 
-    // Handle preflight requests
-    if (request.method === 'OPTIONS') {
-      console.log(`🔧 [WORKER ${requestId}] Handling OPTIONS preflight`);
-      return new Response(null, { headers: corsHeaders })
+    try {
+      let response: Response;
+
+      // Handle preflight requests
+      if (request.method === 'OPTIONS') {
+        logWithContext('info', requestId, '🔧 [WORKER] Handling OPTIONS preflight', {}, env);
+        response = new Response(null, { headers: corsHeaders });
+      }
+      // Utility endpoint: Check if prompt is cached
+      else if (url.pathname === '/api/checkCache' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: checkCache', {}, env);
+        response = await handleCheckCache(request, env, corsHeaders, requestId);
+      }
+      // Utility endpoint: Upload FAL URL to Cloudflare Images  
+      else if (url.pathname === '/api/uploadImage' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: uploadImage', {}, env);
+        response = await handleUploadImage(request, env, corsHeaders, requestId);
+      }
+      // Simple status endpoint
+      else if (url.pathname === '/') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: status', {}, env);
+        response = new Response('ShotDeckAI Image Persistence Service - Ready', {
+          headers: { 'Content-Type': 'text/plain', ...corsHeaders }
+        });
+      }
+      else {
+        logWithContext('warn', requestId, '❌ [WORKER] Route not found', { path: url.pathname }, env);
+        response = new Response('Not Found', { status: 404, headers: corsHeaders });
+      }
+
+      const totalDuration = Date.now() - requestStartTime;
+      logWithContext('info', requestId, '✅ [WORKER] Request completed', {
+        status: response.status,
+        duration: totalDuration,
+        path: url.pathname
+      }, env);
+
+      return response;
+
+    } catch (error) {
+      const totalDuration = Date.now() - requestStartTime;
+      logWithContext('error', requestId, '💥 [WORKER] Unhandled error', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        duration: totalDuration,
+        path: url.pathname
+      }, env);
+
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
-
-    // Utility endpoint: Check if prompt is cached
-    if (url.pathname === '/api/checkCache' && request.method === 'POST') {
-      console.log(`🔧 [WORKER ${requestId}] Route: checkCache`);
-      return await handleCheckCache(request, env, corsHeaders, requestId)
-    }
-
-    // Utility endpoint: Upload FAL URL to Cloudflare Images  
-    if (url.pathname === '/api/uploadImage' && request.method === 'POST') {
-      console.log(`🔧 [WORKER ${requestId}] Route: uploadImage`);
-      return await handleUploadImage(request, env, corsHeaders, requestId)
-    }
-
-    // Simple status endpoint
-    if (url.pathname === '/') {
-      console.log(`🔧 [WORKER ${requestId}] Route: status`);
-      return new Response('ShotDeckAI Image Persistence Service - Ready', {
-        headers: { 'Content-Type': 'text/plain', ...corsHeaders }
-      })
-    }
-
-    console.log(`❌ [WORKER ${requestId}] Route not found: ${url.pathname}`);
-    return new Response('Not Found', { status: 404, headers: corsHeaders })
   }
 }
 
@@ -66,10 +127,10 @@ async function handleCheckCache(request: Request, env: Env, corsHeaders: Record<
     const body = await request.json() as { prompt?: string }
     const { prompt } = body
 
-    console.log(`🔍 [CACHE ${requestId}] Checking for prompt: "${prompt}"`);
+    logWithContext('info', requestId, '🔍 [CACHE] Checking cache', { prompt }, env);
 
     if (!prompt || typeof prompt !== 'string') {
-      console.error(`❌ [CACHE ${requestId}] Invalid prompt provided`);
+      logWithContext('warn', requestId, '❌ [CACHE] Invalid prompt provided', { prompt }, env);
       return new Response(JSON.stringify({ error: "Prompt is required" }), { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -78,7 +139,6 @@ async function handleCheckCache(request: Request, env: Env, corsHeaders: Record<
 
     // Use the same caching pattern as your localStorage
     const cacheKey = prompt.trim().toLowerCase()
-    console.log(`🔍 [CACHE ${requestId}] Cache key: "${cacheKey}"`);
     
     // Check KV cache
     const kvStartTime = Date.now();
@@ -89,13 +149,13 @@ async function handleCheckCache(request: Request, env: Env, corsHeaders: Record<
       const imageData = JSON.parse(cachedImageData)
       const totalDuration = Date.now() - startTime;
       
-      console.log(`✅ [CACHE ${requestId}] HIT! Found in KV in ${kvDuration}ms`);
-      console.log(`✅ [CACHE ${requestId}] Image data:`, {
-        persistentUrl: imageData.persistentUrl,
-        cloudflareImageId: imageData.cloudflareImageId,
-        timestamp: new Date(imageData.timestamp).toISOString()
-      });
-      console.log(`✅ [CACHE ${requestId}] Total response time: ${totalDuration}ms`);
+      logWithContext('info', requestId, '✅ [CACHE] Cache HIT', {
+        cacheKey,
+        kvDuration,
+        totalDuration,
+        imageId: imageData.cloudflareImageId,
+        timestamp: imageData.timestamp
+      }, env);
       
       return new Response(JSON.stringify({ 
         cached: true, 
@@ -107,8 +167,11 @@ async function handleCheckCache(request: Request, env: Env, corsHeaders: Record<
     }
 
     const totalDuration = Date.now() - startTime;
-    console.log(`❌ [CACHE ${requestId}] MISS! Not found in KV (checked in ${kvDuration}ms)`);
-    console.log(`❌ [CACHE ${requestId}] Total response time: ${totalDuration}ms`);
+    logWithContext('info', requestId, '❌ [CACHE] Cache MISS', {
+      cacheKey,
+      kvDuration,
+      totalDuration
+    }, env);
 
     return new Response(JSON.stringify({ cached: false }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -116,7 +179,11 @@ async function handleCheckCache(request: Request, env: Env, corsHeaders: Record<
 
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    console.error(`💥 [CACHE ${requestId}] Error after ${totalDuration}ms:`, error);
+    logWithContext('error', requestId, '💥 [CACHE] Error during cache check', {
+      error: error instanceof Error ? error.message : String(error),
+      duration: totalDuration
+    }, env);
+    
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -132,12 +199,17 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
     const body = await request.json() as { prompt?: string; falUrl?: string }
     const { prompt, falUrl } = body
 
-    console.log(`💾 [UPLOAD ${requestId}] Starting upload process`);
-    console.log(`💾 [UPLOAD ${requestId}] Prompt: "${prompt}"`);
-    console.log(`💾 [UPLOAD ${requestId}] FAL URL: ${falUrl}`);
+    logWithContext('info', requestId, '💾 [UPLOAD] Starting upload process', {
+      prompt,
+      falUrl
+    }, env);
 
     if (!prompt || !falUrl) {
-      console.error(`❌ [UPLOAD ${requestId}] Missing required fields:`, { prompt: !!prompt, falUrl: !!falUrl });
+      logWithContext('warn', requestId, '❌ [UPLOAD] Missing required fields', {
+        hasPrompt: !!prompt,
+        hasFalUrl: !!falUrl
+      }, env);
+      
       return new Response(JSON.stringify({ error: "Prompt and falUrl are required" }), { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -145,18 +217,17 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
     }
 
     // Upload the FAL image to Cloudflare Images for persistence
-    console.log(`📤 [UPLOAD ${requestId}] Uploading to Cloudflare Images...`);
     const uploadStartTime = Date.now();
-    
     const cloudflareImageId = await uploadToCloudflareImages(falUrl, env)
     const uploadDuration = Date.now() - uploadStartTime;
     
-    console.log(`✅ [UPLOAD ${requestId}] Upload completed in ${uploadDuration}ms`);
-    console.log(`✅ [UPLOAD ${requestId}] Cloudflare Image ID: ${cloudflareImageId}`);
+    logWithContext('info', requestId, '✅ [UPLOAD] Cloudflare upload completed', {
+      uploadDuration,
+      cloudflareImageId
+    }, env);
 
     // Create the persistent URL
     const persistentUrl = `https://imagedelivery.net/${env.CLOUDFLARE_IMAGE_ACCOUNT_HASH}/${cloudflareImageId}/public`
-    console.log(`🔗 [UPLOAD ${requestId}] Persistent URL: ${persistentUrl}`);
 
     // Cache both URLs with the same key pattern as localStorage
     const cacheKey = prompt.trim().toLowerCase()
@@ -167,16 +238,20 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
       timestamp: Date.now()
     }
 
-    console.log(`💾 [UPLOAD ${requestId}] Caching with key: "${cacheKey}"`);
     const cacheStartTime = Date.now();
-    
     await env.IMAGE_CACHE.put(cacheKey, JSON.stringify(cacheData))
     const cacheDuration = Date.now() - cacheStartTime;
     
     const totalDuration = Date.now() - startTime;
-    console.log(`✅ [UPLOAD ${requestId}] Cached in KV in ${cacheDuration}ms`);
-    console.log(`🎉 [UPLOAD ${requestId}] COMPLETE! Total time: ${totalDuration}ms`);
-    console.log(`🔧 [WORKER ${requestId}] === REQUEST COMPLETE ===\n`);
+    
+    logWithContext('info', requestId, '🎉 [UPLOAD] Upload and cache complete', {
+      cacheKey,
+      uploadDuration,
+      cacheDuration,
+      totalDuration,
+      cloudflareImageId,
+      persistentUrl
+    }, env);
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -188,14 +263,17 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
 
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    console.error(`💥 [UPLOAD ${requestId}] Error after ${totalDuration}ms:`, error);
+    
+    logWithContext('error', requestId, '💥 [UPLOAD] Upload failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      duration: totalDuration
+    }, env);
     
     let errorMessage = "Failed to upload image"
     if (error instanceof Error) {
       errorMessage = error.message
     }
-    
-    console.log(`🔧 [WORKER ${requestId}] === REQUEST FAILED ===\n`);
     
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
