@@ -12,6 +12,10 @@ export interface Env {
   ENABLE_REQUEST_LOGGING?: string
 }
 
+interface ImageGenerationResult {
+  images?: Array<{ url: string }>;
+}
+
 // Enhanced logging utility for Workers Logs dashboard
 function logWithContext(level: 'info' | 'warn' | 'error', requestId: string, message: string, metadata?: Record<string, unknown>, env?: Env) {
   const enableLogging = env?.ENABLE_REQUEST_LOGGING !== 'false';
@@ -80,6 +84,11 @@ export default {
       else if (url.pathname === '/api/uploadImage' && request.method === 'POST') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: uploadImage', {}, env);
         response = await handleUploadImage(request, env, corsHeaders, requestId);
+      }
+      // NEW: Full image generation endpoint
+      else if (url.pathname === '/api/generateImage' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: generateImage', {}, env);
+        response = await handleGenerateImage(request, env, corsHeaders, requestId);
       }
       // Simple status endpoint
       else if (url.pathname === '/') {
@@ -271,6 +280,190 @@ async function handleUploadImage(request: Request, env: Env, corsHeaders: Record
     }, env);
     
     let errorMessage = "Failed to upload image"
+    if (error instanceof Error) {
+      errorMessage = error.message
+    }
+    
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Full image generation: check cache, generate with FAL, upload to Cloudflare
+async function handleGenerateImage(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  const startTime = Date.now();
+  
+  try {
+    const body = await request.json() as { prompt?: string }
+    const { prompt } = body
+
+    logWithContext('info', requestId, '🎨 [GENERATE] Starting full generation process', { prompt }, env);
+
+    if (!prompt || typeof prompt !== 'string') {
+      logWithContext('warn', requestId, '❌ [GENERATE] Invalid prompt provided', { prompt }, env);
+      return new Response(JSON.stringify({ error: "Prompt is required" }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Step 1: Check cache first
+    const cacheKey = prompt.trim().toLowerCase()
+    const kvStartTime = Date.now();
+    const cachedImageData = await env.IMAGE_CACHE.get(cacheKey)
+    const kvDuration = Date.now() - kvStartTime;
+    
+    if (cachedImageData) {
+      const imageData = JSON.parse(cachedImageData)
+      const totalDuration = Date.now() - startTime;
+      
+      logWithContext('info', requestId, '✅ [GENERATE] Cache HIT - returning cached image', {
+        cacheKey,
+        kvDuration,
+        totalDuration,
+        imageId: imageData.cloudflareImageId
+      }, env);
+      
+      return new Response(JSON.stringify({ 
+        url: imageData.persistentUrl
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    logWithContext('info', requestId, '❌ [GENERATE] Cache MISS - generating new image', {
+      cacheKey,
+      kvDuration
+    }, env);
+
+    // Step 2: Generate with FAL AI
+    if (!env.FAL_KEY) {
+      logWithContext('error', requestId, '❌ [GENERATE] FAL_KEY not configured', {}, env);
+      return new Response(JSON.stringify({ error: "Image generation service not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    logWithContext('info', requestId, '🎨 [GENERATE] Starting FAL AI generation', { prompt }, env);
+    const falStartTime = Date.now();
+
+    // Call FAL AI API directly (since we can't use the SDK in worker)
+    const falResponse = await fetch('https://fal.run/fal-ai/flux-1/schnell', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${env.FAL_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `${prompt} {
+          "style_name": "DigitalStoryboard_Teal",
+          "medium": "digital sketch (tablet, pressure-sensitive pen)",
+          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
+          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
+          "color_palette": {
+            "primary": ["#70A0A0", "#406C6C"],
+            "accents": ["#DF7425"],
+            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]
+          },
+          "detail_level": "low-medium on characters & key props, very low on background",
+          "background": "plain white (no texture)",
+          "texture_overlay": "none (clean digital canvas)",
+          "lighting": "flat fill with sparse gray shadow blocks"
+        }`,
+        image_size: "landscape_4_3",
+        num_inference_steps: 8,
+        enable_safety_checker: true,
+        num_images: 1,
+        seed: 42
+      })
+    });
+
+    const falDuration = Date.now() - falStartTime;
+
+    if (!falResponse.ok) {
+      logWithContext('error', requestId, '❌ [GENERATE] FAL AI generation failed', {
+        status: falResponse.status,
+        statusText: falResponse.statusText,
+        duration: falDuration
+      }, env);
+      
+      return new Response(JSON.stringify({ error: "Image generation failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    const falResult = await falResponse.json() as ImageGenerationResult;
+    const falImageUrl = falResult.images?.[0]?.url;
+
+    if (!falImageUrl) {
+      logWithContext('error', requestId, '❌ [GENERATE] No image URL in FAL response', {
+        falResult,
+        duration: falDuration
+      }, env);
+      
+      return new Response(JSON.stringify({ error: "No image generated" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    logWithContext('info', requestId, '✅ [GENERATE] FAL AI generation complete', {
+      duration: falDuration,
+      falImageUrl
+    }, env);
+
+    // Step 3: Upload to Cloudflare Images
+    logWithContext('info', requestId, '💾 [GENERATE] Uploading to Cloudflare Images', {}, env);
+    const uploadStartTime = Date.now();
+    
+    const cloudflareImageId = await uploadToCloudflareImages(falImageUrl, env)
+    const uploadDuration = Date.now() - uploadStartTime;
+
+    // Step 4: Cache the result
+    const persistentUrl = `https://imagedelivery.net/${env.CLOUDFLARE_IMAGE_ACCOUNT_HASH}/${cloudflareImageId}/public`
+    const cacheData = {
+      originalFalUrl: falImageUrl,
+      cloudflareImageId: cloudflareImageId,
+      persistentUrl: persistentUrl,
+      timestamp: Date.now()
+    }
+
+    const cacheStartTime = Date.now();
+    await env.IMAGE_CACHE.put(cacheKey, JSON.stringify(cacheData))
+    const cacheDuration = Date.now() - cacheStartTime;
+    
+    const totalDuration = Date.now() - startTime;
+    
+    logWithContext('info', requestId, '🎉 [GENERATE] Full generation complete', {
+      cacheKey,
+      falDuration,
+      uploadDuration,
+      cacheDuration,
+      totalDuration,
+      cloudflareImageId,
+      persistentUrl
+    }, env);
+
+    return new Response(JSON.stringify({ 
+      url: persistentUrl
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+
+  } catch (error) {
+    const totalDuration = Date.now() - startTime;
+    
+    logWithContext('error', requestId, '💥 [GENERATE] Generation failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      duration: totalDuration
+    }, env);
+    
+    let errorMessage = "Failed to generate image"
     if (error instanceof Error) {
       errorMessage = error.message
     }
