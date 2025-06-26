@@ -90,6 +90,26 @@ export default {
         logWithContext('info', requestId, '🔧 [WORKER] Route: cacheStats', {}, env);
         response = await handleCacheStats(request, env, corsHeaders, requestId);
       }
+      // Predictive Cache: Generate prompt predictions
+      else if (url.pathname === '/api/predictPrompts' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: predictPrompts', {}, env);
+        response = await handlePredictPrompts(request, env, corsHeaders, requestId);
+      }
+      // Clustering: Analyze cache clusters for optimization
+      else if (url.pathname === '/api/analyzeClusters' && request.method === 'GET') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: analyzeClusters', {}, env);
+        response = await handleAnalyzeClusters(request, env, corsHeaders, requestId);
+      }
+      // User Analytics: Track user behavior and patterns
+      else if (url.pathname === '/api/userAnalytics' && request.method === 'GET') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: userAnalytics', {}, env);
+        response = await handleUserAnalytics(request, env, corsHeaders, requestId);
+      }
+      // User Analytics: Track typing patterns
+      else if (url.pathname === '/api/trackTyping' && request.method === 'POST') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: trackTyping', {}, env);
+        response = await handleTrackTyping(request, env, corsHeaders, requestId);
+      }
       // Simple status endpoint
       else if (url.pathname === '/') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: status', {}, env);
@@ -458,6 +478,199 @@ async function handleCacheStats(request: Request, env: Env, corsHeaders: Record<
     return new Response(JSON.stringify({ 
       success: false,
       error: "Failed to calculate cache statistics",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Generate predictive prompt completions
+async function handlePredictPrompts(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    const body = await request.json() as { 
+      partial?: string; 
+      sessionId?: string; 
+      userAgent?: string 
+    }
+    const { partial, sessionId, userAgent } = body
+
+    logWithContext('info', requestId, '🔮 [PREDICT] Prediction request received', { 
+      partial, 
+      sessionId 
+    }, env);
+
+    if (!partial || typeof partial !== 'string') {
+      return new Response(JSON.stringify({ 
+        error: "Partial input is required" 
+      }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Import predictive cache functions
+    const { analyzeTypingPattern } = await import('./predictive-cache');
+    
+    // Analyze typing pattern and generate predictions
+    const result = await analyzeTypingPattern({
+      partial,
+      timestamp: Date.now(),
+      sessionId: sessionId || 'anonymous',
+      userAgent
+    }, env, requestId);
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      predictions: result.predictions,
+      confidence: result.confidence,
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [PREDICT] Prediction failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to generate predictions",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Analyze cache clusters for optimization opportunities
+async function handleAnalyzeClusters(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    logWithContext('info', requestId, '🔍 [CLUSTER] Cluster analysis requested', {}, env);
+
+    // Import clustering functions
+    const { analyzeCacheClusters } = await import('./clustering');
+    
+    // Perform cluster analysis
+    const analysis = await analyzeCacheClusters(env, requestId);
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      analysis,
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [CLUSTER] Cluster analysis failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to analyze clusters",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Get user behavior analytics
+async function handleUserAnalytics(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    logWithContext('info', requestId, '📈 [ANALYTICS] User analytics requested', {}, env);
+
+    // Import user analytics functions
+    const { analyzeUserBehavior } = await import('./user-analytics');
+    
+    // Perform user behavior analysis
+    const analytics = await analyzeUserBehavior(env, requestId);
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      analytics,
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [ANALYTICS] User analytics failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to analyze user behavior",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+// Track user typing patterns
+async function handleTrackTyping(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    const body = await request.json() as { 
+      partial?: string;
+      sessionId?: string;
+      duration?: number;
+      finalPrompt?: string;
+      abandoned?: boolean;
+    }
+    const { partial, sessionId, duration, finalPrompt, abandoned } = body
+
+    logWithContext('info', requestId, '⌨️ [TRACK] Typing pattern tracking', { 
+      partial, 
+      sessionId,
+      duration 
+    }, env);
+
+    if (!partial || !sessionId || duration === undefined) {
+      return new Response(JSON.stringify({ 
+        error: "partial, sessionId, and duration are required" 
+      }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Import user analytics functions
+    const { trackTypingPattern } = await import('./user-analytics');
+    
+    // Track the typing pattern
+    await trackTypingPattern({
+      timestamp: Date.now(),
+      partial,
+      finalPrompt,
+      duration,
+      abandoned
+    }, sessionId, env, requestId);
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: "Typing pattern tracked",
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [TRACK] Typing tracking failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to track typing pattern",
       requestId 
     }), {
       status: 500,
