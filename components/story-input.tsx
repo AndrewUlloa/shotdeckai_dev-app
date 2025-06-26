@@ -15,6 +15,8 @@ interface StoryInputProps {
 interface GenerateImageResponse {
   url?: string;
   error?: string;
+  cached?: boolean;
+  semantic?: boolean;
   [key: string]: unknown; // Allow other response properties
 }
 
@@ -247,7 +249,22 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       return;
     }
     
-    // For all other cases, use rhythm-based analysis
+    // CHECK FOR IMMEDIATE CACHE HIT (bypass timeout for cached content)
+    const cachedImage = getCachedImage(newPrompt);
+    const normalizedPrompt = newPrompt.trim().toLowerCase();
+    
+    if (cachedImage && normalizedPrompt !== lastGeneratedPrompt) {
+      console.log('⚡ [INSTANT CACHE] Cache hit detected, bypassing timeout!');
+      setUserState('settled');
+      onImageGenerated(cachedImage);
+      setLastGeneratedPrompt(normalizedPrompt);
+      if (isFirstInput) {
+        setIsFirstInput(false);
+      }
+      return;
+    }
+    
+    // For non-cached content, use rhythm-based analysis
     const delay = analyzeUserIntent(newPrompt);
     
     // Set new timeout
@@ -262,15 +279,15 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       setUserState('settled');
       
       // Check if we have a cached image for this prompt
-      const cachedImage = getCachedImage(newPrompt);
-      const normalizedPrompt = newPrompt.trim().toLowerCase();
+      const timeoutCachedImage = getCachedImage(newPrompt);
+      const timeoutNormalizedPrompt = newPrompt.trim().toLowerCase();
       
-      if (cachedImage && normalizedPrompt !== lastGeneratedPrompt) {
+      if (timeoutCachedImage && timeoutNormalizedPrompt !== lastGeneratedPrompt) {
         // Use cached image if it's different from the last one we showed
         console.log('🎯 [SETTLED] Using cached image for new prompt');
-        onImageGenerated(cachedImage);
-        setLastGeneratedPrompt(normalizedPrompt);
-      } else if (!cachedImage) {
+        onImageGenerated(timeoutCachedImage);
+        setLastGeneratedPrompt(timeoutNormalizedPrompt);
+      } else if (!timeoutCachedImage) {
         // Generate new image
         console.log('🎨 [SETTLED] No cache found, triggering generation');
         setShouldGenerate(true);
@@ -347,6 +364,16 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           console.log('💾 [CACHE SAVE] Saving to browser cache:', prompt, '→', json.url);
           // Save to cache
           saveToCache(prompt, json.url);
+          
+          // Check if this was a semantic cache hit (super fast response)
+          if (json.cached && json.semantic) {
+            console.log('⚡ [SEMANTIC HIT] Fast semantic cache response, clearing timeouts');
+            // Clear any pending timeouts since we got an instant result
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = undefined;
+            }
+          }
           
           console.log('✅ [GENERATION COMPLETE] Image generated and cached successfully');
           onImageGenerated(json.url);
