@@ -59,6 +59,10 @@ export default {
 
     try {
       let response: Response;
+      let cacheStatus = 'unknown';
+      let subrequestCount = 0;
+      let kvLookups = 0;
+      let externalApiCalls = 0;
 
       // Handle preflight requests
       if (request.method === 'OPTIONS') {
@@ -78,6 +82,7 @@ export default {
       // NEW: Full image generation endpoint
       else if (url.pathname === '/api/generateImage' && request.method === 'POST') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: generateImage', {}, env);
+        subrequestCount++; // Track as potential subrequest
         response = await handleGenerateImage(request, env, corsHeaders, requestId);
       }
       // Semantic Cache: Manually expand cache for a prompt
@@ -163,10 +168,42 @@ Available Endpoints:
       }
 
       const totalDuration = Date.now() - requestStartTime;
+      
+      // Determine cache status based on response content
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        try {
+          const responseClone = response.clone();
+          const json = await responseClone.json() as { cached?: boolean; semantic?: boolean; success?: boolean };
+          if (json.cached === true) {
+            cacheStatus = json.semantic ? 'semantic_hit' : 'kv_hit';
+            kvLookups++;
+          } else if (json.success === false) {
+            cacheStatus = 'error';
+          } else {
+            cacheStatus = 'generated';
+            externalApiCalls++; // New generation = external API call
+          }
+        } catch {
+          cacheStatus = 'unknown';
+        }
+      }
+      
       logWithContext('info', requestId, '✅ [WORKER] Request completed', {
         status: response.status,
         duration: totalDuration,
-        path: url.pathname
+        path: url.pathname,
+        cloudflareMetrics: {
+          cacheStatus,
+          kvLookups, 
+          externalApiCalls,
+          subrequestCount,
+          // This helps correlate with Cloudflare Analytics
+          explanation: {
+            cached_subrequests: kvLookups > 0 && cacheStatus.includes('hit') ? 'KV cache hit (not counted by CF)' : 'No KV hits',
+            uncached_subrequests: externalApiCalls > 0 ? `External API calls: ${externalApiCalls}` : 'No external calls',
+            cf_analytics_note: 'CF analytics only counts HTTP cache, not KV cache'
+          }
+        }
       }, env);
 
       return response;
