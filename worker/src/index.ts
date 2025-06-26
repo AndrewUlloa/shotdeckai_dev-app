@@ -120,6 +120,16 @@ export default {
         logWithContext('info', requestId, '🔧 [WORKER] Route: testSystem', {}, env);
         response = await handleSystemTest(request, env, corsHeaders, requestId);
       }
+      // DEBUG: Browse KV entries
+      else if (url.pathname === '/api/browseKV' && request.method === 'GET') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: browseKV', {}, env);
+        response = await handleBrowseKV(request, env, corsHeaders, requestId);
+      }
+      // ADMIN: Clear all cache entries for fresh start
+      else if (url.pathname === '/api/clearCache' && request.method === 'DELETE') {
+        logWithContext('info', requestId, '🧹 [WORKER] Route: clearCache', {}, env);
+        response = await handleClearCache(request, env, corsHeaders, requestId);
+      }
       // Simple status endpoint
       else if (url.pathname === '/') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: status', {}, env);
@@ -764,10 +774,10 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
     const testResults: {
       timestamp: string;
       requestId: string;
-      environment: Record<string, any>;
-      phases: Record<string, any>;
-      endpoints: Record<string, any>;
-      performance: Record<string, any>;
+      environment: Record<string, boolean | string>;
+      phases: Record<string, Record<string, unknown>>;
+      endpoints: Record<string, unknown>;
+      performance: Record<string, number>;
       errors: string[];
     } = {
       timestamp: new Date().toISOString(),
@@ -836,7 +846,7 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
       testResults.phases.predictiveCache = {
         module: 'loaded',
         functionCall: 'success',
-        predictions: result?.predictions?.length || 0
+        predictions: Array.isArray(result) ? result.length : 0
       };
     } catch (error) {
       testResults.phases.predictiveCache = { working: false, error: String(error) };
@@ -861,17 +871,16 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
     // Test 6: User Analytics (Phase 4)
     logWithContext('info', requestId, '🧪 [TEST] Phase 6: User analytics test', {}, env);
     try {
-      const { trackUserBehavior } = await import('./user-analytics');
-      const result = await trackUserBehavior({
-        sessionId: `test_${requestId}`,
-        prompt: 'test prompt',
-        accuracy: 0.8,
+      const { trackUserSession } = await import('./user-analytics');
+      await trackUserSession({
+        id: `test_${requestId}`,
+        prompts: ['test prompt'],
         timestamp: Date.now()
       }, env, requestId);
       testResults.phases.userAnalytics = {
         module: 'loaded',
         functionCall: 'success',
-        tracked: !!result
+        tracked: true
       };
     } catch (error) {
       testResults.phases.userAnalytics = { working: false, error: String(error) };
@@ -926,6 +935,148 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
       error: "System test failed",
       details: error instanceof Error ? error.message : String(error),
       requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// DEBUG: Browse KV entries
+async function handleBrowseKV(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    logWithContext('info', requestId, '🔧 [WORKER] Route: browseKV', {}, env);
+
+    // List all cache keys to analyze
+    const keys = await env.IMAGE_CACHE.list();
+    const allEntries = [];
+    
+    // Fetch a sample of cache entries for analysis
+    const sampleSize = Math.min(keys.keys.length, 100); // Limit to avoid timeouts
+    for (let i = 0; i < sampleSize; i++) {
+      const key = keys.keys[i];
+      const value = await env.IMAGE_CACHE.get(key.name);
+      if (value) {
+        try {
+          const entry = JSON.parse(value);
+          allEntries.push({
+            key: key.name,
+            ...entry
+          });
+        } catch {
+          // Skip invalid entries
+        }
+      }
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true,
+      entries: allEntries,
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [WORKER] Browse KV failed', {
+      error: error instanceof Error ? error.message : String(error)
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "Failed to browse KV entries",
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+/**
+ * Handle cache clearing for fresh start
+ */
+async function handleClearCache(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string): Promise<Response> {
+  try {
+    logWithContext('info', requestId, '🧹 [CACHE] Starting complete cache clear', {}, env);
+
+    // Get all cache keys for analysis
+    const allKeys = await env.IMAGE_CACHE.list();
+    const totalKeys = allKeys.keys?.length || 0;
+    
+    if (totalKeys === 0) {
+      logWithContext('info', requestId, '📭 [CACHE] Cache already empty', {}, env);
+      return new Response(JSON.stringify({
+        success: true,
+        message: "Cache was already empty",
+        deletedEntries: 0,
+        requestId
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    logWithContext('info', requestId, '🔍 [CACHE] Analyzing cache before clearing', {
+      totalEntries: totalKeys,
+      sampleKeys: allKeys.keys?.slice(0, 5).map(k => k.name.substring(0, 30) + '...')
+    }, env);
+
+    // Delete all entries in batches for performance
+    let deletedCount = 0;
+    const batchSize = 100;
+    
+    for (let i = 0; i < allKeys.keys.length; i += batchSize) {
+      const batch = allKeys.keys.slice(i, i + batchSize);
+      const deletePromises = batch.map(async (key) => {
+        try {
+          await env.IMAGE_CACHE.delete(key.name);
+          deletedCount++;
+          return { success: true, key: key.name };
+        } catch (error) {
+          logWithContext('warn', requestId, '⚠️ [CACHE] Failed to delete key', {
+            key: key.name,
+            error: error instanceof Error ? error.message : String(error)
+          }, env);
+          return { success: false, key: key.name };
+        }
+      });
+      
+      await Promise.all(deletePromises);
+      
+      // Small delay between batches to prevent overwhelming
+      if (i + batchSize < allKeys.keys.length) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+    }
+
+    logWithContext('info', requestId, '✅ [CACHE] Cache clearing completed', {
+      totalFound: totalKeys,
+      deletedCount,
+      successRate: Math.round((deletedCount / totalKeys) * 100) + '%'
+    }, env);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Cache cleared successfully",
+      deletedEntries: deletedCount,
+      totalFound: totalKeys,
+      successRate: Math.round((deletedCount / totalKeys) * 100) + '%',
+      requestId
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [CACHE] Clear operation failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    }, env);
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: "Failed to clear cache",
+      details: error instanceof Error ? error.message : String(error),
+      requestId
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -14,15 +14,35 @@ export interface Env {
   PREDICTION_ACCURACY_THRESHOLD?: string
 }
 
+/**
+ * Enhanced cache entry structure based on industry research
+ * Supports domain-specific optimization and analytics
+ */
 export interface CacheEntry {
   originalPrompt: string;
   persistentUrl: string;
   cloudflareImageId: string;
   timestamp: number;
+  
+  // Enhanced semantic cache metadata (2024-2025 industry standards)
   isSemanticVariation?: boolean;
   semanticCluster?: string;
-  userBehaviorData?: {
-    accuracy: number;
-    usage: number;
-  };
+  
+  // Domain-specific optimization
+  domain?: 'storyboard' | 'general';
+  expansionStrategy?: 'conservative' | 'aggressive' | 'adaptive';
+  qualityScore?: number;
+  
+  // Variation tracking for analytics
+  variationIndex?: number;
+  generatedAt?: number;
+  parentPrompt?: string;
+  
+  // Performance analytics
+  cacheHits?: number;
+  lastAccessed?: number;
+  
+  // TTL and expiration management
+  expiresAt?: number;
+  refreshAt?: number;
 } 

@@ -17,3 +17,8 @@ id = "0bee46597d0f4ad697d0040789273d2c"
 [vars]
 LOG_LEVEL = "info"
 ENABLE_REQUEST_LOGGING = "true"
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
+invocation_logs = false

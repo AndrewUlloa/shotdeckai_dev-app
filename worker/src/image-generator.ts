@@ -103,24 +103,43 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
   log('info', requestId, '🎬 [API] Starting storyboard generation', { prompt }, env)
   
   try {
-    // First, check semantic cache
-    const cachedEntry = await checkSemanticCache(prompt, env, requestId);
-    if (cachedEntry) {
-      log('info', requestId, '🔍 [CACHE HIT] Returning cached image from semantic cache', {
-        prompt,
-        cachedUrl: cachedEntry.persistentUrl,
-        isSemanticVariation: cachedEntry.isSemanticVariation,
-        originalPrompt: cachedEntry.originalPrompt,
-        timeSaved: Date.now() - startTime
-      }, env)
+    // Check semantic cache first (industry best practice)
+    const semanticHit = await checkSemanticCache(
+      prompt, 
+      env, 
+      requestId,
+      {
+        domain: 'storyboard',
+        adaptiveThreshold: true,
+        minConfidence: 0.85,
+        maxConfidence: 0.98
+      }
+    );
+    
+    if (semanticHit) {
+      log('info', requestId, '🎯 [CACHE] Semantic cache hit', { 
+        prompt: prompt.substring(0, 50) + '...',
+        cached: true,
+        semantic: true,
+        originalPrompt: semanticHit.originalPrompt?.substring(0, 50) + '...',
+        cluster: semanticHit.semanticCluster,
+        qualityScore: semanticHit.qualityScore
+      }, env);
       
       return new Response(JSON.stringify({
         success: true,
-        url: cachedEntry.persistentUrl,
+        url: semanticHit.persistentUrl,
         cached: true,
         semantic: true,
-        originalPrompt: cachedEntry.originalPrompt,
-        requestId
+        originalPrompt: semanticHit.originalPrompt,
+        requestId,
+        cacheType: 'semantic_advanced',
+        metadata: {
+          originalPrompt: semanticHit.originalPrompt,
+          semanticCluster: semanticHit.semanticCluster,
+          qualityScore: semanticHit.qualityScore,
+          domain: semanticHit.domain
+        }
       }), {
         headers: { 'Content-Type': 'application/json' }
       })
@@ -220,14 +239,29 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
       persistentUrl
     }, env)
     
-    // Background semantic cache expansion (don't await to avoid blocking response)
-    expandSemanticCache(prompt, persistentUrl, cloudflareImageId, env, requestId)
-      .catch(error => {
-        log('error', requestId, '🧠 [SEMANTIC ERROR] Background expansion failed', {
-          prompt,
-          error: error instanceof Error ? error.message : String(error)
-        }, env)
-      })
+    // Background semantic cache expansion with industry best practices
+    if (env.ENABLE_SEMANTIC_CACHE === 'true') {
+      // Background expansion - don't await to avoid blocking response
+      expandSemanticCache(
+        prompt, 
+        persistentUrl, 
+        cloudflareImageId, 
+        env, 
+        requestId,
+        {
+          domain: 'storyboard',
+          expansionStrategy: 'adaptive',
+          qualityThreshold: 0.85,
+          clusterId: `storyboard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        }
+      ).catch(error => {
+        // Log but don't fail the request
+        log('error', requestId, '🔮 [SEMANTIC] Background cache expansion failed', {
+          error: error instanceof Error ? error.message : String(error),
+          prompt: prompt.substring(0, 50) + '...'
+        }, env);
+      });
+    }
     
     const totalTime = Date.now() - startTime
     
