@@ -45,4 +45,29 @@ export interface CacheEntry {
   // TTL and expiration management
   expiresAt?: number;
   refreshAt?: number;
+  
+  // Optimization tracking
+  optimized?: boolean;
+}
+
+/**
+ * Upload configuration for optimized Cloudflare uploads
+ */
+export interface UploadConfig {
+  accountId: string;
+  apiToken: string;
+  accountHash: string;
+  optimizations: {
+    streaming: boolean;
+    compression: string;
+    format: string;
+  };
+}
+
+/**
+ * Image generation result with optimization metadata
+ */
+export interface GenerationResult {
+  imageUrl: string | undefined;
+  generationTime: number;
 } 
