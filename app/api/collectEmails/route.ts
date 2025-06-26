@@ -29,5 +29,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
   }
 }
-
-export const runtime = "edge";
