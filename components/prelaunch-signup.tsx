@@ -11,6 +11,10 @@ import { X } from "lucide-react"
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations } from "@/lib/i18n-provider"
 
+interface ApiResponse {
+  error?: string;
+  [key: string]: unknown; // Allow other response properties
+}
 
 export default function PrelaunchSignup() {
   const [isOpen, setIsOpen] = useState(false)
@@ -34,7 +38,7 @@ export default function PrelaunchSignup() {
         body: JSON.stringify({ email }),
       })
 
-      const data = await response.json()
+      const data = await response.json() as ApiResponse
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to subscribe')

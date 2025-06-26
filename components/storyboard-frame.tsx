@@ -17,13 +17,16 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
   useEffect(() => {
     if (imageUrls.length > 0) {
       const newImageUrl = imageUrls[imageUrls.length - 1];
+      console.log('🖼️ [STORYBOARD] New image to display:', newImageUrl);
       
       // If we have an existing image, fade it out first
       if (displayedImageUrl && displayedImageUrl !== newImageUrl) {
+        console.log('🎭 [STORYBOARD] Fading out current image for transition');
         setIsFadingOut(true);
         
         // After fade out completes, update the image
         setTimeout(() => {
+          console.log('🎭 [STORYBOARD] Fade out complete, updating to new image');
           setDisplayedImageUrl(newImageUrl);
           setCurrentImageIndex(imageUrls.length - 1);
           setImageLoading(true);
@@ -31,12 +34,29 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
         }, 300); // Match the transition duration
       } else {
         // First image, just show it
+        console.log('🎨 [STORYBOARD] Displaying first image (no transition)');
         setDisplayedImageUrl(newImageUrl);
         setCurrentImageIndex(imageUrls.length - 1);
         setImageLoading(true);
       }
     }
   }, [imageUrls, displayedImageUrl]);
+
+  // Log loading state changes
+  useEffect(() => {
+    if (isLoading) {
+      console.log('⏳ [STORYBOARD] Component in loading state');
+    }
+  }, [isLoading]);
+
+  // Log image loading state changes
+  useEffect(() => {
+    if (imageLoading) {
+      console.log('🔄 [STORYBOARD] Image is loading...');
+    } else {
+      console.log('✅ [STORYBOARD] Image loaded and displayed');
+    }
+  }, [imageLoading]);
 
   // Determine the animation class based on state
   const getImageClassName = () => {
@@ -66,6 +86,7 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
                 style={{ objectFit: "cover" }}
                 className={`rounded-xl transition-all duration-300 ${isFadingOut ? 'ease-out' : 'ease-in'} ${getImageClassName()}`}
                 onLoadingComplete={() => {
+                  console.log('🎯 [STORYBOARD] Image load complete, fading in');
                   setImageLoading(false);
                 }}
                 priority

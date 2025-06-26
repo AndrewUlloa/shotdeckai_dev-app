@@ -1,79 +1,63 @@
-import * as fal from "@fal-ai/serverless-client";
+export const runtime = 'edge';
 
-fal.config({
-  credentials: process.env.FAL_KEY,
-});
-
-interface ImageGenerationResult {
-  images?: Array<{ url: string }>;
+interface GenerateImageResponse {
+  url?: string;
+  error?: string;
 }
 
 export async function POST(req: Request) {
+  const requestStartTime = Date.now();
+  
   try {
-    const { prompt } = await req.json();
+    const body = await req.json() as { prompt?: string };
+    const { prompt } = body;
 
-    console.log("Received request:", { prompt });
+    console.log('\n🎬 [SHOTDECK API] === NEW IMAGE REQUEST ===');
+    console.log('🎬 [SHOTDECK API] Prompt:', prompt);
+    console.log('🎬 [SHOTDECK API] Timestamp:', new Date().toISOString());
 
     if (!prompt) {
+      console.error('❌ [SHOTDECK API] No prompt provided');
       return Response.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    const result = await fal.subscribe("fal-ai/flux-1/schnell", {
-      input: {
-        prompt: `${prompt} {
-          "style_name": "DigitalStoryboard_Teal",
-          "medium": "digital sketch (tablet, pressure-sensitive pen)",
-          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
-          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
-          "color_palette": {
-            "primary": ["#70A0A0", "#406C6C"],               // teal lines & borders
-            "accents": ["#DF7425"],                           // orange emphasis (props / cues)
-            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]// flat gray fills & paper white
-          },
-          "detail_level": "low-medium on characters & key props, very low on background",
-          "background": "plain white (no texture)",
-          "texture_overlay": "none (clean digital canvas)",
-          "lighting": "flat fill with sparse gray shadow blocks",
-          "ideal_subjects": [
-            "dialogue two-shots",
-            "dynamic action silhouettes",
-            "prop hand-offs",
-            "establishing wides"
-          ],
-          "file_format_hint": [
-            "PNG (transparent or white background)",
-            "PSD with separate line & fill layers"
-          ],
-          "example_prompt": [
-            "Storyboard frame 14: low-angle close-up of Ki-woo tilting his head, teal sketch lines, flat gray shadows, orange highlight on his eyes, handwritten camera arrow indicating LOW ANGLE on the right margin",
-            "Storyboard frame 17: medium shot, character hands a polished stone across a kitchen table, teal outlines, gray table & walls, single orange accent on the stone, arrow pointing PAN LEFT, quick handwritten note above"
-          ]
-        }`,
-        image_size: "landscape_4_3",
-        num_inference_steps: 8,
-        enable_safety_checker: true,
-        num_images: 1,
-        seed: 42,
-      },
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          update.logs.forEach((log) => console.log(log.message));
-        }
-      },
-    }) as ImageGenerationResult;
+    // Proxy everything to the Cloudflare Worker
+    const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://shotdeck-image-cache.andrewsperspective.workers.dev';
+    
+    console.log('🔄 [SHOTDECK API] Proxying to worker:', workerUrl);
+    
+    const startTime = Date.now();
+    const response = await fetch(`${workerUrl}/api/generateImage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
 
-    console.log("API call result:", JSON.stringify(result, null, 2));
+    const duration = Date.now() - startTime;
+    const totalDuration = Date.now() - requestStartTime;
 
-    const imageUrl = result.images?.[0]?.url;
-    if (imageUrl) {
-      return Response.json({ url: imageUrl });
+    if (response.ok) {
+      const result = await response.json() as GenerateImageResponse;
+      console.log('✅ [SHOTDECK API] Worker response in', duration + 'ms');
+      console.log('🚀 [SHOTDECK API] Total request time:', totalDuration + 'ms');
+      console.log('🎬 [SHOTDECK API] === REQUEST COMPLETE ===\n');
+      
+      return Response.json(result);
     } else {
-      console.error("Unexpected API response structure:", result);
-      return Response.json({ error: "Unexpected API response structure" }, { status: 500 });
+      const errorText = await response.text();
+      console.error('❌ [SHOTDECK API] Worker error:', response.status, errorText);
+      console.log('🎬 [SHOTDECK API] === REQUEST FAILED ===\n');
+      
+      return Response.json(
+        { error: "Image generation service unavailable" }, 
+        { status: response.status }
+      );
     }
   } catch (error) {
-    console.error("Error in generateImage:", error);
+    const totalDuration = Date.now() - requestStartTime;
+    console.error('💥 [SHOTDECK API] Error after', totalDuration + 'ms');
+    console.error('💥 [SHOTDECK API] Error details:', error);
+    
     let errorMessage = "An unexpected error occurred";
     if (error instanceof Error) {
       errorMessage = error.message;
@@ -81,5 +65,3 @@ export async function POST(req: Request) {
     return Response.json({ error: errorMessage }, { status: 500 });
   }
 }
-
-export const runtime = "edge";

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShotDeckAI Cache Migration Tool</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+        line-height: 1.6;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: white;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+      .cache-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .cache-item img {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      .status.success {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.5);
+      }
+      .status.error {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+      }
+      .worker-url {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: Monaco, Consolas, monospace;
+        margin: 1rem 0;
+      }
+      .progress {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        margin: 1rem 0;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎬 ShotDeckAI Cache Migration Tool</h1>
+      <p>
+        This tool helps you migrate your existing cached images from
+        localStorage to your new Cloudflare Worker.
+      </p>
+
+      <div>
+        <label for="workerUrl">Worker URL:</label>
+        <input
+          type="text"
+          id="workerUrl"
+          placeholder="https://shotdeck-image-cache.your-subdomain.workers.dev"
+          style="
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+          "
+        />
+      </div>
+
+      <button onclick="loadLocalCache()">🔍 Load Local Cache</button>
+      <button onclick="migrateAll()" id="migrateBtn" disabled>
+        🚀 Migrate All to Worker
+      </button>
+
+      <div class="progress" id="progressContainer" style="display: none">
+        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+      </div>
+
+      <div id="cacheList"></div>
+      <div id="status"></div>
+    </div>
+
+    <script>
+      let localCache = {};
+      let workerUrl = "";
+
+      function loadLocalCache() {
+        const cacheData = localStorage.getItem("shotdeckai_image_cache");
+
+        if (!cacheData) {
+          showStatus("No cache found in localStorage", "error");
+          return;
+        }
+
+        try {
+          localCache = JSON.parse(cacheData);
+          displayCache();
+          document.getElementById("migrateBtn").disabled = false;
+          showStatus(
+            `Found ${Object.keys(localCache).length} cached images`,
+            "success"
+          );
+        } catch (error) {
+          showStatus("Error parsing cache data: " + error.message, "error");
+        }
+      }
+
+      function displayCache() {
+        const cacheList = document.getElementById("cacheList");
+        cacheList.innerHTML = "<h3>📋 Cached Images:</h3>";
+
+        Object.entries(localCache).forEach(([prompt, url]) => {
+          const item = document.createElement("div");
+          item.className = "cache-item";
+          item.innerHTML = `
+                    <div>
+                        <strong>"${prompt}"</strong><br>
+                        <small>${url}</small>
+                    </div>
+                    <img src="${url}" alt="${prompt}" onerror="this.style.display='none'">
+                `;
+          cacheList.appendChild(item);
+        });
+      }
+
+      async function migrateAll() {
+        workerUrl = document.getElementById("workerUrl").value.trim();
+
+        if (!workerUrl) {
+          showStatus("Please enter your worker URL", "error");
+          return;
+        }
+
+        const entries = Object.entries(localCache);
+        const total = entries.length;
+        let completed = 0;
+        let errors = 0;
+
+        document.getElementById("progressContainer").style.display = "block";
+        document.getElementById("migrateBtn").disabled = true;
+
+        showStatus(`Starting migration of ${total} images...`, "success");
+
+        for (const [prompt, originalUrl] of entries) {
+          try {
+            await migrateImage(prompt, originalUrl);
+            completed++;
+          } catch (error) {
+            console.error(`Error migrating "${prompt}":`, error);
+            errors++;
+          }
+
+          // Update progress
+          const progress = ((completed + errors) / total) * 100;
+          document.getElementById("progressBar").style.width = progress + "%";
+
+          // Small delay to prevent overwhelming the worker
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+
+        showStatus(
+          `Migration completed! ✅ ${completed} successful, ❌ ${errors} errors`,
+          errors > 0 ? "error" : "success"
+        );
+
+        document.getElementById("migrateBtn").disabled = false;
+      }
+
+      async function migrateImage(prompt, originalUrl) {
+        const response = await fetch(`${workerUrl}/api/generateImage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log(`Migrated "${prompt}" -> ${result.url}`);
+        return result.url;
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById("status");
+        status.innerHTML = message;
+        status.className = `status ${type}`;
+      }
+
+      // Auto-load cache on page load
+      window.addEventListener("load", () => {
+        // Try to detect if we're on localhost and suggest the worker URL
+        if (window.location.hostname === "localhost") {
+          document.getElementById("workerUrl").placeholder =
+            "http://localhost:8787";
+        }
+        loadLocalCache();
+      });
+    </script>
+  </body>
+</html>

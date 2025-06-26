@@ -6,7 +6,7 @@ import { Logo } from "@/components/ui/logo";
 // import { ArrowUp } from "lucide-react";
 // import { body, div } from "framer-motion/client";
 
-
+export const runtime = 'edge';
 
 export default function Home() { 
   return (

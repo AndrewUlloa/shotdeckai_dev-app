@@ -3,6 +3,12 @@
 import { ThemeProvider } from 'next-themes'
 import { ReactNode, useEffect } from 'react'
 
+interface IPApiResponse {
+  country_code: string;
+  languages?: string[];
+  [key: string]: unknown; // Allow other properties from the API
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Client-side locale detection fallback
@@ -17,7 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
         try {
           // Try to detect country using a free IP geolocation service
           const response = await fetch('https://ipapi.co/json/')
-          const data = await response.json()
+          const data = await response.json() as IPApiResponse
           
           if (data.country_code === 'CO') {
             // Set Colombian Spanish locale
