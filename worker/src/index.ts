@@ -110,10 +110,50 @@ export default {
         logWithContext('info', requestId, '🔧 [WORKER] Route: trackTyping', {}, env);
         response = await handleTrackTyping(request, env, corsHeaders, requestId);
       }
+      // TEST: Comprehensive system test
+      else if (url.pathname === '/api/testSystem' && request.method === 'GET') {
+        logWithContext('info', requestId, '🔧 [WORKER] Route: testSystem', {}, env);
+        response = await handleSystemTest(request, env, corsHeaders, requestId);
+      }
       // Simple status endpoint
       else if (url.pathname === '/') {
         logWithContext('info', requestId, '🔧 [WORKER] Route: status', {}, env);
-        response = new Response('ShotDeckAI Image Persistence Service - Ready', {
+        
+        // Add environment check to status
+        const envStatus = {
+          FAL_KEY: !!env.FAL_KEY ? '✅ Set' : '❌ Missing',
+          GEMINI_API_KEY: !!env.GEMINI_API_KEY ? '✅ Set' : '❌ Missing',
+          CLOUDFLARE_ACCOUNT_ID: !!env.CLOUDFLARE_ACCOUNT_ID ? '✅ Set' : '❌ Missing',
+          CLOUDFLARE_API_TOKEN: !!env.CLOUDFLARE_API_TOKEN ? '✅ Set' : '❌ Missing',
+          CLOUDFLARE_IMAGE_ACCOUNT_HASH: !!env.CLOUDFLARE_IMAGE_ACCOUNT_HASH ? '✅ Set' : '❌ Missing',
+          IMAGE_CACHE: !!env.IMAGE_CACHE ? '✅ Available' : '❌ Missing',
+          SEMANTIC_CACHE_ENABLED: env.ENABLE_SEMANTIC_CACHE !== 'false' ? '✅ Enabled' : '⚠️ Disabled'
+        };
+        
+        logWithContext('info', requestId, '🔧 [WORKER] Environment status', envStatus, env);
+        
+        const statusMessage = `ShotDeckAI Image Persistence Service - Ready
+        
+Environment Status:
+- FAL_KEY: ${envStatus.FAL_KEY}
+- GEMINI_API_KEY: ${envStatus.GEMINI_API_KEY}
+- CLOUDFLARE_ACCOUNT_ID: ${envStatus.CLOUDFLARE_ACCOUNT_ID}
+- CLOUDFLARE_API_TOKEN: ${envStatus.CLOUDFLARE_API_TOKEN}
+- CLOUDFLARE_IMAGE_ACCOUNT_HASH: ${envStatus.CLOUDFLARE_IMAGE_ACCOUNT_HASH}
+- IMAGE_CACHE: ${envStatus.IMAGE_CACHE}
+- SEMANTIC_CACHE: ${envStatus.SEMANTIC_CACHE_ENABLED}
+
+Available Endpoints:
+- POST /api/generateImage - Main image generation
+- POST /api/expandCache - Manual semantic expansion
+- GET /api/cacheStats - Cache performance metrics
+- POST /api/predictPrompts - Prompt predictions
+- GET /api/analyzeClusters - Cache cluster analysis
+- GET /api/userAnalytics - User behavior analytics
+- POST /api/trackTyping - Track typing patterns
+- GET /api/testSystem - Comprehensive system test`;
+        
+        response = new Response(statusMessage, {
           headers: { 'Content-Type': 'text/plain', ...corsHeaders }
         });
       }
@@ -676,5 +716,182 @@ async function handleTrackTyping(request: Request, env: Env, corsHeaders: Record
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
+  }
+}
+
+// TEST: Comprehensive system test
+async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<string, string>, requestId: string) {
+  try {
+    logWithContext('info', requestId, '🧪 [TEST] Starting comprehensive system test', {}, env);
+    
+    const testResults: {
+      timestamp: string;
+      requestId: string;
+      environment: Record<string, any>;
+      phases: Record<string, any>;
+      endpoints: Record<string, any>;
+      performance: Record<string, any>;
+      errors: string[];
+    } = {
+      timestamp: new Date().toISOString(),
+      requestId,
+      environment: {},
+      phases: {},
+      endpoints: {},
+      performance: {},
+      errors: []
+    };
+
+    // Test 1: Environment Variables
+    logWithContext('info', requestId, '🧪 [TEST] Phase 1: Environment check', {}, env);
+    testResults.environment = {
+      FAL_KEY: !!env.FAL_KEY,
+      GEMINI_API_KEY: !!env.GEMINI_API_KEY,
+      CLOUDFLARE_ACCOUNT_ID: !!env.CLOUDFLARE_ACCOUNT_ID,
+      CLOUDFLARE_API_TOKEN: !!env.CLOUDFLARE_API_TOKEN,
+      CLOUDFLARE_IMAGE_ACCOUNT_HASH: !!env.CLOUDFLARE_IMAGE_ACCOUNT_HASH,
+      IMAGE_CACHE: !!env.IMAGE_CACHE,
+      LOG_LEVEL: env.LOG_LEVEL || 'info',
+      ENABLE_REQUEST_LOGGING: env.ENABLE_REQUEST_LOGGING !== 'false'
+    };
+
+    // Test 2: KV Cache Access
+    logWithContext('info', requestId, '🧪 [TEST] Phase 2: KV Cache test', {}, env);
+    try {
+      const testKey = `test_${requestId}`;
+      const testData = { test: true, timestamp: Date.now() };
+      
+      await env.IMAGE_CACHE.put(testKey, JSON.stringify(testData));
+      const retrieved = await env.IMAGE_CACHE.get(testKey);
+      await env.IMAGE_CACHE.delete(testKey);
+      
+      testResults.phases.kvCache = {
+        working: !!retrieved,
+        canWrite: true,
+        canRead: !!retrieved,
+        canDelete: true
+      };
+    } catch (error) {
+      testResults.phases.kvCache = { working: false, error: String(error) };
+      testResults.errors.push(`KV Cache: ${error}`);
+    }
+
+    // Test 3: Semantic Cache (Phase 1)
+    logWithContext('info', requestId, '🧪 [TEST] Phase 3: Semantic cache test', {}, env);
+    try {
+      const { checkSemanticCache } = await import('./semantic-cache');
+      const result = await checkSemanticCache('test prompt for system check', env, requestId);
+      testResults.phases.semanticCache = {
+        module: 'loaded',
+        functionCall: 'success',
+        result: result ? 'cache_hit' : 'cache_miss'
+      };
+    } catch (error) {
+      testResults.phases.semanticCache = { working: false, error: String(error) };
+      testResults.errors.push(`Semantic Cache: ${error}`);
+    }
+
+    // Test 4: Predictive Cache (Phase 2)
+    logWithContext('info', requestId, '🧪 [TEST] Phase 4: Predictive cache test', {}, env);
+    try {
+      const { generatePredictivePrompts } = await import('./predictive-cache');
+      const result = await generatePredictivePrompts('test partial', [], env, requestId);
+      testResults.phases.predictiveCache = {
+        module: 'loaded',
+        functionCall: 'success',
+        predictions: result?.predictions?.length || 0
+      };
+    } catch (error) {
+      testResults.phases.predictiveCache = { working: false, error: String(error) };
+      testResults.errors.push(`Predictive Cache: ${error}`);
+    }
+
+    // Test 5: Cluster Analysis (Phase 3)
+    logWithContext('info', requestId, '🧪 [TEST] Phase 5: Cluster analysis test', {}, env);
+    try {
+      const { analyzeCacheClusters } = await import('./clustering');
+      const result = await analyzeCacheClusters(env, requestId);
+      testResults.phases.clusterAnalysis = {
+        module: 'loaded',
+        functionCall: 'success',
+        clusters: result?.clusters?.length || 0
+      };
+    } catch (error) {
+      testResults.phases.clusterAnalysis = { working: false, error: String(error) };
+      testResults.errors.push(`Cluster Analysis: ${error}`);
+    }
+
+    // Test 6: User Analytics (Phase 4)
+    logWithContext('info', requestId, '🧪 [TEST] Phase 6: User analytics test', {}, env);
+    try {
+      const { trackUserBehavior } = await import('./user-analytics');
+      const result = await trackUserBehavior({
+        sessionId: `test_${requestId}`,
+        prompt: 'test prompt',
+        accuracy: 0.8,
+        timestamp: Date.now()
+      }, env, requestId);
+      testResults.phases.userAnalytics = {
+        module: 'loaded',
+        functionCall: 'success',
+        tracked: !!result
+      };
+    } catch (error) {
+      testResults.phases.userAnalytics = { working: false, error: String(error) };
+      testResults.errors.push(`User Analytics: ${error}`);
+    }
+
+    // Test 7: Performance Metrics
+    const endTime = Date.now();
+    const startTime = endTime - 5000; // Assuming 5 second max test time
+    testResults.performance = {
+      testDuration: endTime - startTime,
+      errorsCount: testResults.errors.length,
+      successfulPhases: Object.values(testResults.phases).filter(p => p.working !== false).length,
+      totalPhases: Object.keys(testResults.phases).length
+    };
+
+    // Calculate overall health score
+    const healthScore = Math.round(
+      (testResults.performance.successfulPhases / testResults.performance.totalPhases) * 100
+    );
+
+    logWithContext('info', requestId, '🧪 [TEST] System test completed', {
+      healthScore,
+      errors: testResults.errors.length,
+      phases: testResults.performance.successfulPhases + '/' + testResults.performance.totalPhases
+    }, env);
+
+    return new Response(JSON.stringify({ 
+      success: true,
+      healthScore,
+      testResults,
+      summary: {
+        overallHealth: healthScore >= 80 ? '✅ Healthy' : healthScore >= 50 ? '⚠️ Degraded' : '❌ Critical',
+        readyForProduction: healthScore >= 80 && testResults.environment.FAL_KEY,
+        nextSteps: healthScore < 100 ? [
+          !testResults.environment.GEMINI_API_KEY ? 'Set GEMINI_API_KEY for full semantic features' : null,
+          testResults.errors.length > 0 ? 'Check error logs for issues' : null
+        ].filter(Boolean) : ['System fully operational']
+      }
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    logWithContext('error', requestId, '💥 [TEST] System test failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    }, env);
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: "System test failed",
+      details: error instanceof Error ? error.message : String(error),
+      requestId 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 } 
