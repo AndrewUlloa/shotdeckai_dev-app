@@ -140,7 +140,7 @@ export default {
         
         // Add environment check to status
         const envStatus = {
-          FAL_KEY: !!env.FAL_KEY ? '✅ Set' : '❌ Missing',
+          CLOUDFLARE_WORKERS_AI: !!env.AI ? '✅ Available' : '❌ Missing',
           GEMINI_API_KEY: !!env.GEMINI_API_KEY ? '✅ Set' : '❌ Missing',
           CLOUDFLARE_ACCOUNT_ID: !!env.CLOUDFLARE_ACCOUNT_ID ? '✅ Set' : '❌ Missing',
           CLOUDFLARE_API_TOKEN: !!env.CLOUDFLARE_API_TOKEN ? '✅ Set' : '❌ Missing',
@@ -154,7 +154,7 @@ export default {
         const statusMessage = `ShotDeckAI Image Persistence Service - Ready
         
 Environment Status:
-- FAL_KEY: ${envStatus.FAL_KEY}
+- CLOUDFLARE_WORKERS_AI: ${envStatus.CLOUDFLARE_WORKERS_AI}
 - GEMINI_API_KEY: ${envStatus.GEMINI_API_KEY}
 - CLOUDFLARE_ACCOUNT_ID: ${envStatus.CLOUDFLARE_ACCOUNT_ID}
 - CLOUDFLARE_API_TOKEN: ${envStatus.CLOUDFLARE_API_TOKEN}
@@ -796,7 +796,7 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
     // Test 1: Environment Variables
     logWithContext('info', requestId, '🧪 [TEST] Phase 1: Environment check', {}, env);
     testResults.environment = {
-      FAL_KEY: !!env.FAL_KEY,
+      CLOUDFLARE_WORKERS_AI: !!env.AI,
       GEMINI_API_KEY: !!env.GEMINI_API_KEY,
       CLOUDFLARE_ACCOUNT_ID: !!env.CLOUDFLARE_ACCOUNT_ID,
       CLOUDFLARE_API_TOKEN: !!env.CLOUDFLARE_API_TOKEN,
@@ -918,7 +918,7 @@ async function handleSystemTest(request: Request, env: Env, corsHeaders: Record<
       testResults,
       summary: {
         overallHealth: healthScore >= 80 ? '✅ Healthy' : healthScore >= 50 ? '⚠️ Degraded' : '❌ Critical',
-        readyForProduction: healthScore >= 80 && testResults.environment.FAL_KEY,
+        readyForProduction: healthScore >= 80 && testResults.environment.CLOUDFLARE_WORKERS_AI,
         nextSteps: healthScore < 100 ? [
           !testResults.environment.GEMINI_API_KEY ? 'Set GEMINI_API_KEY for full semantic features' : null,
           testResults.errors.length > 0 ? 'Check error logs for issues' : null

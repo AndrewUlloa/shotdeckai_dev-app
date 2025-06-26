@@ -1,11 +1,6 @@
-import * as fal from "@fal-ai/serverless-client";
-import type { Env, CacheEntry, UploadConfig, GenerationResult } from './types'
+import type { Env, CacheEntry, UploadConfig, GenerationResult, CloudflareAIResponse } from './types'
 import { uploadToCloudflareImages } from './image-uploader'
 import { checkSemanticCache, expandSemanticCache } from './semantic-cache'
-
-interface ImageGenerationResult {
-  images?: Array<{ url: string }>;
-}
 
 // Enhanced logging function
 function log(level: 'info' | 'warn' | 'error', requestId: string, message: string, metadata?: Record<string, unknown>, env?: Env) {
@@ -32,70 +27,34 @@ function log(level: 'info' | 'warn' | 'error', requestId: string, message: strin
 }
 
 export async function generateImage(prompt: string, env: Env): Promise<string> {
-  // Configure FAL client with the API key
-  fal.config({
-    credentials: env.FAL_KEY,
-  });
-
   try {
-    const result = await fal.subscribe("fal-ai/flux-1/schnell", {
-      input: {
-        prompt: `${prompt} {
-          "style_name": "DigitalStoryboard_Teal",
-          "medium": "digital sketch (tablet, pressure-sensitive pen)",
-          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
-          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
-          "color_palette": {
-            "primary": ["#70A0A0", "#406C6C"],               // teal lines & borders
-            "accents": ["#DF7425"],                           // orange emphasis (props / cues)
-            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]// flat gray fills & paper white
-          },
-          "detail_level": "low-medium on characters & key props, very low on background",
-          "background": "plain white (no texture)",
-          "texture_overlay": "none (clean digital canvas)",
-          "lighting": "flat fill with sparse gray shadow blocks",
-          "ideal_subjects": [
-            "dialogue two-shots",
-            "dynamic action silhouettes",
-            "prop hand-offs",
-            "establishing wides"
-          ],
-          "file_format_hint": [
-            "PNG (transparent or white background)",
-            "PSD with separate line & fill layers"
-          ]
-        }`,
-        image_size: "landscape_4_3",
-        num_inference_steps: 8,
-        enable_safety_checker: true,
-        num_images: 1,
-        seed: 42,
-      },
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          update.logs.forEach((log) => console.log(log.message));
-        }
-      },
-    }) as ImageGenerationResult;
+    // Generate enhanced storyboard prompt
+    const enhancedPrompt = `${prompt}, digital storyboard style, teal line art, clean white background, cinematic composition, professional sketch quality`;
 
-    console.log("FAL API call result:", JSON.stringify(result, null, 2));
+    // Use Cloudflare Workers AI FLUX.1 [schnell] model
+    const result = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+      prompt: enhancedPrompt,
+      steps: 6 // Optimized for speed while maintaining quality
+    }) as CloudflareAIResponse;
 
-    const imageUrl = result.images?.[0]?.url;
-    if (imageUrl) {
-      return imageUrl;
+    console.log("Cloudflare Workers AI result generated successfully");
+
+    if (result.image) {
+      // Convert base64 to data URI for immediate use
+      const dataURI = `data:image/jpeg;charset=utf-8;base64,${result.image}`;
+      return dataURI;
     } else {
-      console.error("Unexpected FAL API response structure:", result);
-      throw new Error("Unexpected FAL API response structure");
+      console.error("Unexpected Cloudflare Workers AI response structure:", result);
+      throw new Error("Unexpected Cloudflare Workers AI response structure");
     }
   } catch (error) {
-    console.error("Error generating image with FAL:", error);
+    console.error("Error generating image with Cloudflare Workers AI:", error);
     throw error;
   }
 }
 
 /**
- * Generate storyboard image using FAL API with enhanced caching
+ * Generate storyboard image using Cloudflare Workers AI with enhanced caching
  */
 export async function generateStoryboardImage(prompt: string, env: Env, requestId: string): Promise<Response> {
   const startTime = Date.now()
@@ -147,64 +106,30 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
     
     log('info', requestId, '🔍 [CACHE MISS] No cached image found, generating new one', { prompt }, env)
     
-    // Configure FAL client with the API key
-    fal.config({
-      credentials: env.FAL_KEY,
-    });
-
-    log('info', requestId, '🎨 [FAL] Starting image generation with official client', { prompt }, env)
+    log('info', requestId, '🎨 [CLOUDFLARE AI] Starting image generation with Workers AI', { prompt }, env)
     
-    // Use the official FAL client library for generation
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
-      input: {
-        prompt: `${prompt} {
-          "style_name": "DigitalStoryboard_Teal",
-          "medium": "digital sketch (tablet, pressure-sensitive pen)",
-          "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
-          "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
-          "color_palette": {
-            "primary": ["#70A0A0", "#406C6C"],               // teal lines & borders
-            "accents": ["#DF7425"],                           // orange emphasis (props / cues)
-            "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]// flat gray fills & paper white
-          },
-          "detail_level": "low-medium on characters & key props, very low on background",
-          "background": "plain white (no texture)",
-          "texture_overlay": "none (clean digital canvas)",
-          "lighting": "flat fill with sparse gray shadow blocks",
-          "ideal_subjects": [
-            "dialogue two-shots",
-            "dynamic action silhouettes",
-            "prop hand-offs",
-            "establishing wides"
-          ],
-          "file_format_hint": [
-            "PNG (transparent or white background)",
-            "PSD with separate line & fill layers"
-          ]
-        }`,
-        image_size: "landscape_4_3",
-        num_inference_steps: 8,
-        enable_safety_checker: true,
-        num_images: 1,
-        seed: 42,
-      },
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          log('info', requestId, '🎨 [FAL PROGRESS] Generation in progress', { status: update.status }, env)
-        }
-      },
-    }) as ImageGenerationResult;
+    // Enhanced storyboard prompt for Cloudflare Workers AI
+    const enhancedPrompt = `${prompt}, digital storyboard style, teal color scheme (#70A0A0, #406C6C), loose line art, clean white background, cinematic composition, professional sketch quality, film storyboard panel, digital art tablet style`;
 
-    log('info', requestId, '🎨 [FAL RESPONSE] Received response from FAL', { 
-      hasImages: !!result.images,
-      imageCount: result.images?.length || 0 
+    // Use Cloudflare Workers AI FLUX.1 [schnell] model
+    const result = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+      prompt: enhancedPrompt,
+      steps: 6 // Optimized for speed while maintaining quality
+    }) as CloudflareAIResponse;
+
+    log('info', requestId, '🎨 [CLOUDFLARE AI] Received response from Workers AI', { 
+      hasImage: !!result.image
     }, env)
     
-    const imageUrl = result.images?.[0]?.url
+    // Convert base64 to blob URL for upload
+    let imageUrl: string | undefined;
+    if (result.image) {
+      const dataURI = `data:image/jpeg;charset=utf-8;base64,${result.image}`;
+      imageUrl = dataURI;
+    }
     
     if (!imageUrl) {
-      log('error', requestId, '❌ [FAL ERROR] No image URL in response', { result }, env)
+      log('error', requestId, '❌ [CLOUDFLARE AI ERROR] No image generated in response', { result }, env)
       return new Response(JSON.stringify({
         success: false,
         error: 'No image generated',
@@ -212,9 +137,8 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
       }), { status: 500, headers: { 'Content-Type': 'application/json' } })
     }
     
-    log('info', requestId, '✅ [FAL SUCCESS] Image generated', {
+    log('info', requestId, '✅ [CLOUDFLARE AI SUCCESS] Image generated', {
       prompt,
-      imageUrl,
       generationTime: Date.now() - startTime
     }, env)
     
@@ -270,7 +194,7 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
       persistentUrl,
       totalTime,
       components: {
-        generation: 'FAL AI',
+        generation: 'Cloudflare Workers AI',
         upload: 'Cloudflare Images',
         cache: 'KV Store',
         semanticExpansion: 'Background'
@@ -286,7 +210,7 @@ export async function generateStoryboardImage(prompt: string, env: Env, requestI
       timing: {
         total: totalTime,
         cacheCheck: 'semantic',
-        generation: 'fal',
+        generation: 'cloudflare-workers-ai',
         upload: 'cloudflare'
       }
     }), {
@@ -359,11 +283,6 @@ export async function generateStoryboardImageOptimized(prompt: string, env: Env,
     
     log('info', requestId, '🔍 [OPTIMIZED] Cache miss - starting parallel generation', { prompt }, env)
     
-    // Configure FAL client
-    fal.config({
-      credentials: env.FAL_KEY,
-    });
-
     // OPTIMIZATION 1: Parallel Generation + Upload Preparation
     const [generationResult, uploadPrep] = await Promise.all([
       // Generate image with optimized settings
@@ -454,59 +373,33 @@ export async function generateStoryboardImageOptimized(prompt: string, env: Env,
 }
 
 /**
- * Generate image with FAL optimizations
+ * Generate image with Cloudflare Workers AI optimizations
  * Based on Google Cloud inference optimization research
  */
 async function generateImageWithOptimizations(prompt: string, requestId: string, env: Env): Promise<GenerationResult> {
   const generationStartTime = Date.now();
   
-  log('info', requestId, '🎨 [FAL-OPT] Starting optimized generation', { 
-    optimizations: ['reduced_steps', 'optimized_guidance', 'efficient_scheduling']
+  log('info', requestId, '🎨 [CLOUDFLARE AI-OPT] Starting optimized generation', { 
+    optimizations: ['reduced_steps', 'enhanced_prompting', 'efficient_processing']
   }, env);
 
-  const result = await fal.subscribe("fal-ai/flux/schnell", {
-    input: {
-      prompt: `${prompt} {
-        "style_name": "DigitalStoryboard_Teal",
-        "medium": "digital sketch (tablet, pressure-sensitive pen)",
-        "brush_stroke": "loose teal linework ≈2 pt, variable opacity, minimal cross-hatching",
-        "edges": "crisp teal rectangular panel borders; internal arrows & notes in lighter teal",
-        "color_palette": {
-          "primary": ["#70A0A0", "#406C6C"],
-          "accents": ["#DF7425"],
-          "complementary": ["#E0E0E0", "#BDBDBD", "#FFFFFF"]
-        },
-        "detail_level": "low-medium on characters & key props, very low on background",
-        "background": "plain white (no texture)",
-        "texture_overlay": "none (clean digital canvas)",
-        "lighting": "flat fill with sparse gray shadow blocks"
-      }`,
-      image_size: "landscape_4_3",
-      num_inference_steps: 6, // OPTIMIZATION: Reduced from 8 to 6 (25% faster)
-      enable_safety_checker: true,
-      num_images: 1,
-      seed: 42,
-      guidance_scale: 3.5, // OPTIMIZATION: Optimized guidance scale
-      scheduler: "euler_a" // OPTIMIZATION: Faster scheduler
-    },
-    logs: false, // OPTIMIZATION: Disable verbose logging
-    onQueueUpdate: (update) => {
-      if (update.status === "IN_PROGRESS") {
-        log('info', requestId, '🎨 [FAL-OPT] Generation progress', { 
-          status: update.status,
-          optimized: true 
-        }, env)
-      }
-    },
-  }) as ImageGenerationResult;
+  // Enhanced storyboard prompt for optimal results
+  const enhancedPrompt = `${prompt}, digital storyboard style, teal color scheme (#70A0A0, #406C6C), loose line art, clean white background, cinematic composition, professional sketch quality, film storyboard panel, digital art tablet style, 4:3 landscape aspect ratio`;
+
+  const result = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+    prompt: enhancedPrompt,
+    steps: 4 // OPTIMIZATION: Reduced steps for faster generation
+  }) as CloudflareAIResponse;
 
   const generationTime = Date.now() - generationStartTime;
-  const imageUrl = result.images?.[0]?.url;
   
-  log('info', requestId, '✅ [FAL-OPT] Optimized generation complete', {
+  // Convert base64 to data URI
+  const imageUrl = result.image ? `data:image/jpeg;charset=utf-8;base64,${result.image}` : undefined;
+  
+  log('info', requestId, '✅ [CLOUDFLARE AI-OPT] Optimized generation complete', {
     generationTime,
     hasImage: !!imageUrl,
-    improvements: 'reduced_steps+optimized_guidance+efficient_scheduler'
+    improvements: 'reduced_steps+enhanced_prompting+efficient_processing'
   }, env);
 
   return {
@@ -548,7 +441,7 @@ async function optimizedUploadToCloudflare(imageUrl: string, uploadConfig: Uploa
   formData.append('url', imageUrl); // Use 'url' parameter for URL uploads
   formData.append('metadata', JSON.stringify({ 
     optimized: true,
-    source: 'fal-ai',
+    source: 'cloudflare-workers-ai',
     compression: 'auto'
   }));
 

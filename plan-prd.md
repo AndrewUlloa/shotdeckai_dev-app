@@ -20,13 +20,13 @@ Implement an AI-powered semantic cache expansion system that uses Google Gemini 
 - Cache hit rate: ~20% (low)
 - Users type similar prompts but get cache misses
 - Examples: "pizza" vs "pizza slice" vs "piece of pizza" (same visual concept, different cache entries)
-- Expensive FAL AI calls for semantically identical concepts
+- Expensive image generation calls for semantically identical concepts
 - Progressive typing creates many redundant generations
 
 **Impact:**
 
 - Poor user experience (slow responses)
-- High API costs (FAL AI calls)
+- High API costs (image generation calls)
 - Inefficient resource utilization
 
 ## 🎯 **Success Metrics**
@@ -257,7 +257,7 @@ interface CacheEntry {
 
 - Real-time cache performance
 - Semantic expansion success rates
-- Cost analysis (FAL AI vs Gemini costs)
+- Cost analysis (Image generation vs Gemini costs)
 - User experience metrics
 
 ---

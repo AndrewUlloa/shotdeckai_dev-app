@@ -1,5 +1,6 @@
 export interface Env {
-  FAL_KEY: string
+  // Cloudflare Workers AI
+  AI: any // Cloudflare Workers AI binding
   CLOUDFLARE_ACCOUNT_ID: string
   CLOUDFLARE_API_TOKEN: string
   CLOUDFLARE_IMAGE_ACCOUNT_HASH: string
@@ -70,4 +71,11 @@ export interface UploadConfig {
 export interface GenerationResult {
   imageUrl: string | undefined;
   generationTime: number;
+}
+
+/**
+ * Cloudflare Workers AI response interface for FLUX.1 [schnell]
+ */
+export interface CloudflareAIResponse {
+  image: string; // Base64 encoded image
 } 
