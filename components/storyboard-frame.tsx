@@ -26,32 +26,37 @@ export function StoryboardFrameComponent({
       console.log('🖼️ [STORYBOARD] New image to display:', newImageUrl);
       console.log('🔗 [STORYBOARD] Current tier:', currentTier);
       
-      // If we have an existing image, check if we should upgrade
-      if (displayedImageUrl && displayedImageUrl !== newImageUrl) {
-        console.log('🔄 [STORYBOARD] Image upgrade detected');
-        
-        // Progressive upgrade - fade out for new image
-        setIsFadingOut(true);
-        
-        // After fade out completes, update the image
-        setTimeout(() => {
-          console.log('🎭 [STORYBOARD] Fade out complete, upgrading image');
+      // FIXED: Only update if the URL is actually different
+      if (displayedImageUrl !== newImageUrl) {
+        if (displayedImageUrl) {
+          // We have an existing image, fade out first
+          console.log('🔄 [STORYBOARD] Image upgrade detected');
+          setIsFadingOut(true);
+          
+          // After fade out completes, update the image
+          setTimeout(() => {
+            console.log('🎭 [STORYBOARD] Fade out complete, upgrading image');
+            setDisplayedImageUrl(newImageUrl);
+            setDisplayedTier(currentTier);
+            setCurrentImageIndex(imageUrls.length - 1);
+            setImageLoading(true);
+            setIsFadingOut(false);
+          }, 300);
+        } else {
+          // First image, just show it
+          console.log('🎨 [STORYBOARD] Displaying first image');
           setDisplayedImageUrl(newImageUrl);
           setDisplayedTier(currentTier);
           setCurrentImageIndex(imageUrls.length - 1);
           setImageLoading(true);
-          setIsFadingOut(false);
-        }, 300); // Match the transition duration
-      } else {
-        // First image, just show it
-        console.log('🎨 [STORYBOARD] Displaying first image');
-        setDisplayedImageUrl(newImageUrl);
+        }
+      } else if (displayedImageUrl === newImageUrl && displayedTier !== currentTier) {
+        // Same image but different tier - just update the tier indicator
+        console.log('🏷️ [STORYBOARD] Updating tier for same image:', currentTier);
         setDisplayedTier(currentTier);
-        setCurrentImageIndex(imageUrls.length - 1);
-        setImageLoading(true);
       }
     }
-  }, [imageUrls, currentTier, displayedImageUrl]);
+  }, [imageUrls, currentTier]); // FIXED: Removed displayedImageUrl from dependencies
 
   // Log loading state changes
   useEffect(() => {
