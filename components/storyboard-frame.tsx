@@ -6,41 +6,52 @@ import { useState, useEffect } from 'react'
 interface StoryboardFrameProps {
   imageUrls: string[];
   isLoading?: boolean;
+  currentTier?: 'instant' | 'fast' | 'final' | null;
 }
 
-export function StoryboardFrameComponent({ imageUrls, isLoading = false }: StoryboardFrameProps) {
+export function StoryboardFrameComponent({ 
+  imageUrls, 
+  isLoading = false, 
+  currentTier = null 
+}: StoryboardFrameProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [displayedImageUrl, setDisplayedImageUrl] = useState<string | null>(null);
+  const [displayedTier, setDisplayedTier] = useState<'instant' | 'fast' | 'final' | null>(null);
 
   useEffect(() => {
     if (imageUrls.length > 0) {
       const newImageUrl = imageUrls[imageUrls.length - 1];
       console.log('🖼️ [STORYBOARD] New image to display:', newImageUrl);
+      console.log('🔗 [STORYBOARD] Current tier:', currentTier);
       
-      // If we have an existing image, fade it out first
+      // If we have an existing image, check if we should upgrade
       if (displayedImageUrl && displayedImageUrl !== newImageUrl) {
-        console.log('🎭 [STORYBOARD] Fading out current image for transition');
+        console.log('🔄 [STORYBOARD] Image upgrade detected');
+        
+        // Progressive upgrade - fade out for new image
         setIsFadingOut(true);
         
         // After fade out completes, update the image
         setTimeout(() => {
-          console.log('🎭 [STORYBOARD] Fade out complete, updating to new image');
+          console.log('🎭 [STORYBOARD] Fade out complete, upgrading image');
           setDisplayedImageUrl(newImageUrl);
+          setDisplayedTier(currentTier);
           setCurrentImageIndex(imageUrls.length - 1);
           setImageLoading(true);
           setIsFadingOut(false);
         }, 300); // Match the transition duration
       } else {
         // First image, just show it
-        console.log('🎨 [STORYBOARD] Displaying first image (no transition)');
+        console.log('🎨 [STORYBOARD] Displaying first image');
         setDisplayedImageUrl(newImageUrl);
+        setDisplayedTier(currentTier);
         setCurrentImageIndex(imageUrls.length - 1);
         setImageLoading(true);
       }
     }
-  }, [imageUrls, displayedImageUrl]);
+  }, [imageUrls, currentTier, displayedImageUrl]);
 
   // Log loading state changes
   useEffect(() => {
@@ -66,10 +77,45 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
     return 'opacity-100 scale-100';
   };
 
+  // Get tier indicator styling
+  const getTierIndicator = () => {
+    if (!displayedTier) return null;
+    
+    const tierConfig = {
+      instant: { 
+        color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+        label: 'INSTANT',
+        icon: '⚡'
+      },
+      fast: { 
+        color: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+        label: 'FAST',
+        icon: '🚀'
+      },
+      final: { 
+        color: 'bg-green-500/20 text-green-300 border-green-500/30',
+        label: 'FINAL',
+        icon: '✨'
+      }
+    };
+
+    const config = tierConfig[displayedTier];
+    
+    return (
+      <div className={`absolute top-2 right-2 px-2 py-1 rounded-md border text-xs font-mono backdrop-blur-sm z-10 ${config.color} transition-all duration-300`}>
+        <span className="mr-1">{config.icon}</span>
+        {config.label}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full rounded-2xl border-gradient backdrop-blur-[10px] dark:backdrop-blur-[10px] dark:bg-white/10 shadow-lg p-2">
       <div className="w-full aspect-[4/3] bg-white/10 rounded-xl overflow-hidden">
         <div className="relative w-full h-full">
+          {/* Tier Indicator */}
+          {getTierIndicator()}
+          
           {isLoading && !displayedImageUrl ? (
             // Initial loading state - gradient only
             <div className="w-full h-full skeleton-base rounded-xl"></div>
@@ -81,12 +127,13 @@ export function StoryboardFrameComponent({ imageUrls, isLoading = false }: Story
               )}
               <Image 
                 src={displayedImageUrl}
-                alt={`Generated storyboard frame ${currentImageIndex + 1}`}
+                alt={`Generated storyboard frame ${currentImageIndex + 1}${displayedTier ? ` (${displayedTier} quality)` : ''}`}
                 fill
                 style={{ objectFit: "cover" }}
                 className={`rounded-xl transition-all duration-300 ${isFadingOut ? 'ease-out' : 'ease-in'} ${getImageClassName()}`}
                 onLoadingComplete={() => {
                   console.log('🎯 [STORYBOARD] Image load complete, fading in');
+                  console.log('🏷️ [STORYBOARD] Displayed tier:', displayedTier);
                   setImageLoading(false);
                 }}
                 priority

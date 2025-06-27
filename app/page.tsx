@@ -55,18 +55,23 @@ const socialIcons = {
 export default function Home() { 
   const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentImageTier, setCurrentImageTier] = useState<'instant' | 'fast' | 'final' | null>(null);
   const t = useTranslations();
 
-  const handleImageGenerated = (url: string) => {
+  const handleImageGenerated = (url: string, tier?: 'instant' | 'fast' | 'final') => {
     console.log('🎨 [MAIN PAGE] New image received:', url);
+    console.log('🏷️ [MAIN PAGE] Image tier:', tier || 'unknown');
     console.log('🖼️ [MAIN PAGE] Total images generated this session:', generatedImageUrls.length + 1);
+    
     setGeneratedImageUrls([...generatedImageUrls, url]);
+    setCurrentImageTier(tier || null);
     setIsGenerating(false);
   };
 
   const handleGenerationStart = () => {
     console.log('⏳ [MAIN PAGE] Image generation started');
     setIsGenerating(true);
+    // Don't reset tier immediately - keep showing previous tier until new image loads
   };
 
   // Log when generating state changes
@@ -129,7 +134,11 @@ export default function Home() {
               {/* Image Section */}
               <div className="flex flex-col items-start gap-2.5 w-full">
                 <StoryInput onImageGenerated={handleImageGenerated} onGenerationStart={handleGenerationStart} />
-                <StoryboardFrameComponent imageUrls={generatedImageUrls} isLoading={isGenerating} />
+                <StoryboardFrameComponent 
+                  imageUrls={generatedImageUrls} 
+                  isLoading={isGenerating}
+                  currentTier={currentImageTier}
+                />
               </div>
             </div>
           </main>
@@ -212,7 +221,11 @@ export default function Home() {
               {/* Right Column - Input and Frame */}
               <div className="flex flex-col gap-4 lg:gap-6">
                 <StoryInput onImageGenerated={handleImageGenerated} onGenerationStart={handleGenerationStart} />
-                <StoryboardFrameComponent imageUrls={generatedImageUrls} isLoading={isGenerating} />
+                <StoryboardFrameComponent 
+                  imageUrls={generatedImageUrls} 
+                  isLoading={isGenerating}
+                  currentTier={currentImageTier}
+                />
               </div>
             </div>
           </main>

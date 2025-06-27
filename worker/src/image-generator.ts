@@ -615,4 +615,139 @@ async function asyncCacheOperations(
       }
     );
   }
+}
+
+/**
+ * Fast image generation with reduced quality for speed
+ * Used for "fast" tier in multi-tier system
+ */
+export async function generateStoryboardImageFast(prompt: string, env: Env, requestId: string): Promise<Response> {
+  const startTime = Date.now()
+  
+  log('info', requestId, '⚡ [FAST] Starting fast generation', { prompt }, env)
+  
+  try {
+    // Skip semantic cache check for speed in fast tier
+    log('info', requestId, '⚡ [FAST] Skipping cache for speed', { prompt }, env)
+    
+    // Configure FAL client with the API key
+    fal.config({
+      credentials: env.FAL_KEY,
+    });
+
+    log('info', requestId, '⚡ [FAST] Starting fast image generation', { prompt }, env)
+    
+    // Use fast generation settings - prioritize speed over quality
+    const result = await fal.subscribe("fal-ai/flux/schnell", {
+      input: {
+        prompt: `${prompt} simple storyboard sketch, rough lines, basic composition, minimal detail`,
+        image_size: "landscape_4_3",
+        num_inference_steps: 4, // FAST: Reduced from 8 to 4 (50% faster)
+        enable_safety_checker: false, // FAST: Disable for speed
+        num_images: 1,
+        seed: 42,
+        guidance_scale: 2.5, // FAST: Lower guidance for speed
+        scheduler: "euler_a" // FAST: Fastest scheduler
+      },
+      logs: false, // FAST: Disable verbose logging
+      onQueueUpdate: (update) => {
+        if (update.status === "IN_PROGRESS") {
+          log('info', requestId, '⚡ [FAST] Generation progress', { 
+            status: update.status,
+            fast: true 
+          }, env)
+        }
+      },
+    }) as ImageGenerationResult;
+
+    log('info', requestId, '⚡ [FAST] Received response from FAL', { 
+      hasImages: !!result.images,
+      imageCount: result.images?.length || 0 
+    }, env)
+    
+    const imageUrl = result.images?.[0]?.url
+    
+    if (!imageUrl) {
+      log('error', requestId, '❌ [FAST] No image URL in response', { result }, env)
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No image generated',
+        requestId
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+    }
+    
+    log('info', requestId, '✅ [FAST] Image generated', {
+      prompt,
+      imageUrl,
+      generationTime: Date.now() - startTime
+    }, env)
+    
+    // Fast upload to Cloudflare Images (no await for background processes)
+    const cloudflareImageId = await uploadToCloudflareImages(imageUrl, env)
+    const persistentUrl = `https://imagedelivery.net/${env.CLOUDFLARE_IMAGE_ACCOUNT_HASH}/${cloudflareImageId}/public`
+    
+    // Store in regular cache  
+    const cacheKey = prompt.trim().toLowerCase()
+    const cacheEntry: CacheEntry = {
+      originalPrompt: prompt,
+      persistentUrl,
+      cloudflareImageId,
+      timestamp: Date.now(),
+      tier: 'fast' // Mark as fast tier
+    }
+    
+    await env.IMAGE_CACHE.put(cacheKey, JSON.stringify(cacheEntry))
+    
+    log('info', requestId, '💾 [FAST] Cached fast result', {
+      prompt,
+      cacheKey,
+      persistentUrl
+    }, env)
+    
+    const totalTime = Date.now() - startTime
+    
+    log('info', requestId, '⚡ [FAST] Fast generation complete', {
+      prompt,
+      persistentUrl,
+      totalTime,
+      tier: 'fast'
+    }, env)
+    
+    return new Response(JSON.stringify({
+      success: true,
+      url: persistentUrl,
+      cached: false,
+      semantic: false,
+      tier: 'fast',
+      confidence: 0.80, // Lower confidence for fast generation
+      requestId,
+      timing: {
+        total: totalTime,
+        tier: 'fast',
+        optimizations: 'reduced_steps+fast_scheduler+minimal_safety'
+      }
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    
+  } catch (error) {
+    const errorTime = Date.now() - startTime
+    
+    log('error', requestId, '❌ [FAST] Fast generation failed', {
+      prompt,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      duration: errorTime
+    }, env)
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Fast generation failed',
+      requestId,
+      tier: 'fast'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 } 

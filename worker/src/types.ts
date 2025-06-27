@@ -24,6 +24,9 @@ export interface CacheEntry {
   cloudflareImageId: string;
   timestamp: number;
   
+  // Multi-tier system support
+  tier?: 'instant' | 'fast' | 'final';
+  
   // Enhanced semantic cache metadata (2024-2025 industry standards)
   isSemanticVariation?: boolean;
   semanticCluster?: string;

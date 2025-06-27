@@ -7,7 +7,7 @@ import { GlowEffect } from "@/components/ui/glow-effect";
 import { useTranslations } from "@/lib/i18n-provider";
 
 interface StoryInputProps {
-  onImageGenerated: (imageUrl: string) => void;
+  onImageGenerated: (imageUrl: string, tier?: 'instant' | 'fast' | 'final') => void;
   onGenerationStart?: () => void;
 }
 
@@ -17,7 +17,19 @@ interface GenerateImageResponse {
   error?: string;
   cached?: boolean;
   semantic?: boolean;
+  tier?: 'instant' | 'fast' | 'final';
+  confidence?: number;
+  backgroundGeneration?: boolean;
+  reason?: string;
   [key: string]: unknown; // Allow other response properties
+}
+
+// Multi-tier API request interface
+interface MultiTierRequest {
+  prompt: string;
+  tiers?: Array<'instant' | 'fast' | 'final'>;
+  maxTiers?: number;
+  instantOnly?: boolean;
 }
 
 // Track typing rhythm patterns
@@ -109,10 +121,12 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const [isFirstInput, setIsFirstInput] = useState(true);
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [currentImageTier, setCurrentImageTier] = useState<'instant' | 'fast' | 'final' | null>(null);
   const t = useTranslations();
   
   const timeoutRef = useRef<NodeJS.Timeout>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const currentRequestRef = useRef<string | null>(null);
   const rhythmRef = useRef<TypingRhythm>({
     lastKeyTime: Date.now(),
     keyIntervals: [],
@@ -223,6 +237,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     if (!newPrompt.trim()) {
       setShouldGenerate(false);
       setUserState('typing');
+      setCurrentImageTier(null);
       rhythmRef.current.deletionStreak = 0;
       rhythmRef.current.isInDeletionMode = false;
       console.log('🚫 [INPUT] Empty prompt, generation cancelled');
@@ -231,43 +246,35 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     
     // INSTANT GENERATION FOR FIRST INPUT WITH 2 WORDS
     if (isFirstInput && hasTwoWords(newPrompt)) {
-      console.log('⚡ [FIRST INPUT] Two words detected, instant generation triggered');
+      console.log('⚡ [FIRST INPUT] Two words detected, instant multi-tier generation triggered');
       setUserState('settled');
       
       // Check cache first
       const cachedImage = getCachedImage(newPrompt);
-      if (cachedImage) {
-        console.log('🎯 [FIRST INPUT] Using cached image');
-        onImageGenerated(cachedImage);
-        setLastGeneratedPrompt(newPrompt.trim().toLowerCase());
-        setIsFirstInput(false);
+             if (cachedImage) {
+         console.log('🎯 [FIRST INPUT] Using cached image');
+         onImageGenerated(cachedImage, 'instant');
+         setCurrentImageTier('instant');
+         setLastGeneratedPrompt(newPrompt.trim().toLowerCase());
+         setIsFirstInput(false);
       } else {
-        console.log('🎨 [FIRST INPUT] No cache, triggering generation');
-        setShouldGenerate(true);
+        console.log('🎨 [FIRST INPUT] No cache, triggering multi-tier generation');
+        triggerMultiTierGeneration(newPrompt, true); // First input = all tiers
         setIsFirstInput(false);
       }
       return;
     }
     
-    // CHECK FOR IMMEDIATE CACHE HIT (bypass timeout for cached content)
-    const cachedImage = getCachedImage(newPrompt);
-    const normalizedPrompt = newPrompt.trim().toLowerCase();
-    
-    if (cachedImage && normalizedPrompt !== lastGeneratedPrompt) {
-      console.log('⚡ [INSTANT CACHE] Cache hit detected, bypassing timeout!');
-      setUserState('settled');
-      onImageGenerated(cachedImage);
-      setLastGeneratedPrompt(normalizedPrompt);
-      if (isFirstInput) {
-        setIsFirstInput(false);
-      }
-      return;
+    // INSTANT CHECK FOR SUBSEQUENT INPUTS
+    if (!isFirstInput) {
+      console.log('⚡ [INSTANT CHECK] Checking for instant results');
+      triggerInstantCheck(newPrompt);
     }
     
     // For non-cached content, use rhythm-based analysis
     const delay = analyzeUserIntent(newPrompt);
     
-    // Set new timeout
+    // Set new timeout for full generation if no instant results
     console.log('⏰ [TIMEOUT] Setting new timeout:', delay + 'ms');
     timeoutRef.current = setTimeout(() => {
       console.log('⏰ [TIMEOUT] Timeout triggered, user has stopped typing');
@@ -278,29 +285,123 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       
       setUserState('settled');
       
-      // Check if we have a cached image for this prompt
-      const timeoutCachedImage = getCachedImage(newPrompt);
+      // Check if we already have an image for this prompt (from instant check)
       const timeoutNormalizedPrompt = newPrompt.trim().toLowerCase();
-      
-      if (timeoutCachedImage && timeoutNormalizedPrompt !== lastGeneratedPrompt) {
-        // Use cached image if it's different from the last one we showed
-        console.log('🎯 [SETTLED] Using cached image for new prompt');
-        onImageGenerated(timeoutCachedImage);
-        setLastGeneratedPrompt(timeoutNormalizedPrompt);
-      } else if (!timeoutCachedImage) {
-        // Generate new image
-        console.log('🎨 [SETTLED] No cache found, triggering generation');
-        setShouldGenerate(true);
+      if (timeoutNormalizedPrompt !== lastGeneratedPrompt) {
+        console.log('🎨 [SETTLED] No instant result, triggering full multi-tier generation');
+        triggerMultiTierGeneration(newPrompt, false); // Full generation
       } else {
         console.log('🔄 [SETTLED] Same as last prompt, no action needed');
       }
-      // If it's the same as lastGeneratedPrompt, do nothing (image already shown)
       
       if (isFirstInput) {
         setIsFirstInput(false);
       }
     }, delay);
   }, [analyzeUserIntent, isFirstInput, onImageGenerated, lastGeneratedPrompt]);
+
+  // NEW: Trigger instant check for immediate cache hits
+  const triggerInstantCheck = useCallback(async (promptText: string) => {
+    try {
+      console.log('⚡ [INSTANT] Checking for instant results...');
+      
+      // Check local cache first (fastest)
+      const cachedImage = getCachedImage(promptText);
+             if (cachedImage && promptText.trim().toLowerCase() !== lastGeneratedPrompt) {
+         console.log('⚡ [INSTANT] Local cache hit!');
+         onImageGenerated(cachedImage, 'instant');
+         setCurrentImageTier('instant');
+         setLastGeneratedPrompt(promptText.trim().toLowerCase());
+         return;
+       }
+      
+      // Check server-side instant cache
+      const requestId = `instant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      currentRequestRef.current = requestId;
+      
+      const response = await fetch('/api/generateImage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: promptText,
+          tiers: ['instant'],
+          instantOnly: true
+        } as MultiTierRequest),
+      });
+
+      // Check if this request is still current
+      if (currentRequestRef.current !== requestId) {
+        console.log('⚡ [INSTANT] Request superseded, ignoring result');
+        return;
+      }
+
+      if (response.ok) {
+        const result = await response.json() as GenerateImageResponse;
+                 if (result.url && result.tier === 'instant') {
+           console.log('⚡ [INSTANT] Server instant hit! Confidence:', result.confidence);
+           saveToCache(promptText, result.url);
+           onImageGenerated(result.url, 'instant');
+           setCurrentImageTier('instant');
+           setLastGeneratedPrompt(promptText.trim().toLowerCase());
+         }
+      }
+    } catch (error) {
+      console.warn('⚠️ [INSTANT] Instant check failed:', error);
+    }
+  }, [onImageGenerated, lastGeneratedPrompt]);
+
+  // NEW: Trigger multi-tier generation for progressive enhancement
+  const triggerMultiTierGeneration = useCallback(async (promptText: string, isFirstInput: boolean) => {
+    const requestId = `multitier_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    currentRequestRef.current = requestId;
+    
+    try {
+      console.log('🚀 [MULTI-TIER] Starting progressive generation...');
+      onGenerationStart?.();
+      
+      const tiers = isFirstInput ? ['instant', 'fast', 'final'] : ['instant', 'fast'];
+      
+      const response = await fetch('/api/generateImage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: promptText,
+          tiers,
+          maxTiers: 3
+        } as MultiTierRequest),
+      });
+
+      // Check if this request is still current
+      if (currentRequestRef.current !== requestId) {
+        console.log('🚀 [MULTI-TIER] Request superseded, ignoring result');
+        return;
+      }
+
+      if (response.ok) {
+        const result = await response.json() as GenerateImageResponse;
+        if (result.url) {
+          console.log(`🚀 [MULTI-TIER] Generated image with tier: ${result.tier}, confidence: ${result.confidence}`);
+          
+                     // Save to cache and display
+           saveToCache(promptText, result.url);
+           onImageGenerated(result.url, result.tier);
+           setCurrentImageTier(result.tier || 'final');
+           setLastGeneratedPrompt(promptText.trim().toLowerCase());
+          
+          // If background generation was triggered, log it
+          if (result.backgroundGeneration) {
+            console.log('🔥 [BACKGROUND] Background generation started for higher quality');
+          }
+        }
+      } else {
+        console.error('❌ [MULTI-TIER] Generation failed:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ [MULTI-TIER] Generation error:', error);
+    } finally {
+      setShouldGenerate(false);
+    }
+  }, [onImageGenerated, onGenerationStart]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -334,7 +435,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
   const { isLoading, error } = useQuery({
     queryKey: ['generateImage', prompt, shouldGenerate], // Add shouldGenerate to force refetch
     queryFn: async () => {
-      console.log('🚀 [API CALL] Starting image generation for:', prompt);
+      console.log('🚀 [LEGACY API CALL] Fallback to legacy generation for:', prompt);
       const startTime = Date.now();
       
       // Call generation start callback when query starts
@@ -346,11 +447,15 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({ 
+            prompt,
+            tiers: ['fast', 'final'],
+            maxTiers: 2
+          } as MultiTierRequest),
         });
         
         const duration = Date.now() - startTime;
-        console.log('🌐 [API CALL] Response received in:', duration + 'ms');
+        console.log('🌐 [LEGACY API CALL] Response received in:', duration + 'ms');
         
         if (!res.ok) {
           console.error('❌ [API ERROR] HTTP error:', res.status, res.statusText);
@@ -365,19 +470,10 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
           // Save to cache
           saveToCache(prompt, json.url);
           
-          // Check if this was a semantic cache hit (super fast response)
-          if (json.cached && json.semantic) {
-            console.log('⚡ [SEMANTIC HIT] Fast semantic cache response, clearing timeouts');
-            // Clear any pending timeouts since we got an instant result
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-              timeoutRef.current = undefined;
-            }
-          }
-          
-          console.log('✅ [GENERATION COMPLETE] Image generated and cached successfully');
-          onImageGenerated(json.url);
-          setLastGeneratedPrompt(prompt.trim().toLowerCase());
+                     console.log('✅ [GENERATION COMPLETE] Image generated and cached successfully');
+           onImageGenerated(json.url, json.tier);
+           setCurrentImageTier(json.tier || 'final');
+           setLastGeneratedPrompt(prompt.trim().toLowerCase());
           setShouldGenerate(false);
           setUserState('settled');
         } else {
@@ -408,8 +504,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     }
   }, [error]);
 
-  // Get status message based on user state
-  // Kept for future use - currently hidden from UI
+  // Get status message based on user state and current tier
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusMessage = () => {
     if (isLoading) return "Generating image...";
@@ -418,6 +513,15 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     
     // Don't show typing hints on first input to keep it feeling instant
     if (isFirstInput && !isLoading) return null;
+    
+    // Show tier information for debugging (hidden in UI)
+    if (currentImageTier === 'instant') {
+      console.log('📊 [STATUS] Showing instant result (semantic cache)');
+    } else if (currentImageTier === 'fast') {
+      console.log('📊 [STATUS] Showing fast generation result');
+    } else if (currentImageTier === 'final') {
+      console.log('📊 [STATUS] Showing final quality result');
+    }
     
     switch (userState) {
       case 'typing':

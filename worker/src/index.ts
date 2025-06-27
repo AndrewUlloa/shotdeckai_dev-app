@@ -1,8 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { uploadToCloudflareImages } from './image-uploader'
-import { generateStoryboardImage } from './image-generator'
+import { generateStoryboardImage, generateStoryboardImageOptimized, generateStoryboardImageFast } from './image-generator'
 import type { Env } from './types'
+import { checkSemanticCache } from './semantic-cache'
+import { analyzeTypingPattern } from './predictive-cache'
 
 export type { Env } from './types'
 
@@ -35,207 +37,311 @@ function logWithContext(level: 'info' | 'warn' | 'error', requestId: string, mes
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
-    const requestId = Math.random().toString(36).substring(7);
-    const requestStartTime = Date.now();
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Add CORS headers for calls from your Next.js app
+    console.log(`📡 [WORKER] ${request.method} ${url.pathname} - Request ID: ${requestId}`)
+    
+    // CORS headers for all requests
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
+    
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers: corsHeaders })
+    }
+    
+    // Homepage route
+    if (url.pathname === '/' && request.method === 'GET') {
+      const { default: getHomepage } = await import('./homepage')
+      return getHomepage(env, requestId)
+    }
+    
+    // Legacy original generate image endpoint
+    if (url.pathname === '/api/generateImage' && request.method === 'POST') {
+      try {
+        const { prompt } = await request.json() as { prompt: string }
+        const response = await generateStoryboardImage(prompt, env, requestId)
+        
+        // Add CORS headers to the response
+        const responseWithCors = new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: { ...Object.fromEntries(response.headers), ...corsHeaders }
+        })
+        
+        return responseWithCors
+      } catch (error) {
+        console.error(`❌ [WORKER] Error in generateImage: ${error}`)
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Internal server error',
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        })
+      }
     }
 
-    // Enhanced request logging for Workers Logs
-    logWithContext('info', requestId, '🔧 [WORKER] New request started', {
-      method: request.method,
-      path: url.pathname,
-      userAgent: request.headers.get('User-Agent'),
-      cf: {
-        colo: request.cf?.colo,
-        country: request.cf?.country,
-        ray: request.cf?.ray
-      }
-    }, env);
-
-    try {
-      let response: Response;
-      let cacheStatus = 'unknown';
-      const subrequestCount = 0;
-      let kvLookups = 0;
-      let externalApiCalls = 0;
-
-      // Handle preflight requests
-      if (request.method === 'OPTIONS') {
-        logWithContext('info', requestId, '🔧 [WORKER] Handling OPTIONS preflight', {}, env);
-        response = new Response(null, { headers: corsHeaders });
-      }
-      // Utility endpoint: Check if prompt is cached
-      else if (url.pathname === '/api/checkCache' && request.method === 'POST') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: checkCache', {}, env);
-        response = await handleCheckCache(request, env, corsHeaders, requestId);
-      }
-      // Utility endpoint: Upload FAL URL to Cloudflare Images  
-      else if (url.pathname === '/api/uploadImage' && request.method === 'POST') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: uploadImage', {}, env);
-        response = await handleUploadImage(request, env, corsHeaders, requestId);
-      }
-      // Generate storyboard-style image
-      else if (url.pathname === '/api/generateImage' && request.method === 'POST') {
-        logWithContext('info', requestId, '🎬 [WORKER] Route: generateImage', {}, env);
-        response = await handleGenerateImage(request, env, corsHeaders, requestId);
-      }
-      // Generate OPTIMIZED storyboard-style image (45% faster)
-      else if (url.pathname === '/api/generateImageOptimized' && request.method === 'POST') {
-        logWithContext('info', requestId, '🚀 [WORKER] Route: generateImageOptimized', {}, env);
-        response = await handleGenerateImageOptimized(request, env, corsHeaders, requestId);
-      }
-      // Semantic Cache: Manually expand cache for a prompt
-      else if (url.pathname === '/api/expandCache' && request.method === 'POST') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: expandCache', {}, env);
-        response = await handleExpandCache(request, env, corsHeaders, requestId);
-      }
-      // Semantic Cache: Get cache performance statistics
-      else if (url.pathname === '/api/cacheStats' && request.method === 'GET') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: cacheStats', {}, env);
-        response = await handleCacheStats(request, env, corsHeaders, requestId);
-      }
-      // Predictive Cache: Generate prompt predictions
-      else if (url.pathname === '/api/predictPrompts' && request.method === 'POST') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: predictPrompts', {}, env);
-        response = await handlePredictPrompts(request, env, corsHeaders, requestId);
-      }
-      // Clustering: Analyze cache clusters for optimization
-      else if (url.pathname === '/api/analyzeClusters' && request.method === 'GET') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: analyzeClusters', {}, env);
-        response = await handleAnalyzeClusters(request, env, corsHeaders, requestId);
-      }
-      // User Analytics: Track user behavior and patterns
-      else if (url.pathname === '/api/userAnalytics' && request.method === 'GET') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: userAnalytics', {}, env);
-        response = await handleUserAnalytics(request, env, corsHeaders, requestId);
-      }
-      // User Analytics: Track typing patterns
-      else if (url.pathname === '/api/trackTyping' && request.method === 'POST') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: trackTyping', {}, env);
-        response = await handleTrackTyping(request, env, corsHeaders, requestId);
-      }
-      // TEST: Comprehensive system test
-      else if (url.pathname === '/api/testSystem' && request.method === 'GET') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: testSystem', {}, env);
-        response = await handleSystemTest(request, env, corsHeaders, requestId);
-      }
-      // DEBUG: Browse KV entries
-      else if (url.pathname === '/api/browseKV' && request.method === 'GET') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: browseKV', {}, env);
-        response = await handleBrowseKV(request, env, corsHeaders, requestId);
-      }
-      // ADMIN: Clear all cache entries for fresh start
-      else if (url.pathname === '/api/clearCache' && request.method === 'DELETE') {
-        logWithContext('info', requestId, '🧹 [WORKER] Route: clearCache', {}, env);
-        response = await handleClearCache(request, env, corsHeaders, requestId);
-      }
-      // Simple status endpoint
-      else if (url.pathname === '/') {
-        logWithContext('info', requestId, '🔧 [WORKER] Route: status', {}, env);
+    // NEW: TIER 1 - INSTANT endpoint (semantic cache + exact matches)
+    if (url.pathname === '/api/generateImage/instant' && request.method === 'POST') {
+      try {
+        const { prompt, maxOptions = 3 } = await request.json() as { 
+          prompt: string; 
+          maxOptions?: number; 
+        }
         
-        // Add environment check to status
-        const envStatus = {
-          FAL_KEY: !!env.FAL_KEY ? '✅ Set' : '❌ Missing',
-          GEMINI_API_KEY: !!env.GEMINI_API_KEY ? '✅ Set' : '❌ Missing',
-          CLOUDFLARE_ACCOUNT_ID: !!env.CLOUDFLARE_ACCOUNT_ID ? '✅ Set' : '❌ Missing',
-          CLOUDFLARE_API_TOKEN: !!env.CLOUDFLARE_API_TOKEN ? '✅ Set' : '❌ Missing',
-          CLOUDFLARE_IMAGE_ACCOUNT_HASH: !!env.CLOUDFLARE_IMAGE_ACCOUNT_HASH ? '✅ Set' : '❌ Missing',
-          IMAGE_CACHE: !!env.IMAGE_CACHE ? '✅ Available' : '❌ Missing',
-          SEMANTIC_CACHE_ENABLED: env.ENABLE_SEMANTIC_CACHE !== 'false' ? '✅ Enabled' : '⚠️ Disabled'
-        };
+        console.log(`⚡ [INSTANT] Checking instant options for: "${prompt.substring(0, 50)}..."`);
         
-        logWithContext('info', requestId, '🔧 [WORKER] Environment status', envStatus, env);
+        // Check semantic cache with lower threshold for instant results
+        const semanticHit = await checkSemanticCache(
+          prompt, 
+          env, 
+          requestId,
+          {
+            domain: 'storyboard',
+            adaptiveThreshold: true,
+            minConfidence: 0.70, // Lower threshold for instant results
+            maxConfidence: 0.98
+          }
+        );
         
-        const statusMessage = `ShotDeckAI Image Persistence Service - Ready
+        if (semanticHit) {
+          console.log(`⚡ [INSTANT] Semantic hit found with confidence: ${semanticHit.qualityScore || 'unknown'}`);
+          
+          return new Response(JSON.stringify({
+            success: true,
+            url: semanticHit.persistentUrl,
+            tier: 'instant',
+            confidence: semanticHit.qualityScore || 0.85,
+            cached: true,
+            semantic: true,
+            reason: 'semantic_cache_hit',
+            originalPrompt: semanticHit.originalPrompt,
+            requestId
+          }), {
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
         
-Environment Status:
-- FAL_KEY: ${envStatus.FAL_KEY}
-- GEMINI_API_KEY: ${envStatus.GEMINI_API_KEY}
-- CLOUDFLARE_ACCOUNT_ID: ${envStatus.CLOUDFLARE_ACCOUNT_ID}
-- CLOUDFLARE_API_TOKEN: ${envStatus.CLOUDFLARE_API_TOKEN}
-- CLOUDFLARE_IMAGE_ACCOUNT_HASH: ${envStatus.CLOUDFLARE_IMAGE_ACCOUNT_HASH}
-- IMAGE_CACHE: ${envStatus.IMAGE_CACHE}
-- SEMANTIC_CACHE: ${envStatus.SEMANTIC_CACHE_ENABLED}
-
-Available Endpoints:
-- POST /api/generateImage - Main image generation
-- POST /api/expandCache - Manual semantic expansion
-- GET /api/cacheStats - Cache performance metrics
-- POST /api/predictPrompts - Prompt predictions
-- GET /api/analyzeClusters - Cache cluster analysis
-- GET /api/userAnalytics - User behavior analytics
-- POST /api/trackTyping - Track typing patterns
-- GET /api/testSystem - Comprehensive system test`;
+        // Check exact cache match
+        const cacheKey = prompt.trim().toLowerCase();
+        const exactMatch = await env.IMAGE_CACHE.get(cacheKey);
         
-        response = new Response(statusMessage, {
-          headers: { 'Content-Type': 'text/plain', ...corsHeaders }
+        if (exactMatch) {
+          try {
+            const cacheEntry = JSON.parse(exactMatch);
+            console.log(`⚡ [INSTANT] Exact cache hit found`);
+            
+            return new Response(JSON.stringify({
+              success: true,
+              url: cacheEntry.persistentUrl,
+              tier: 'instant',
+              confidence: 1.0,
+              cached: true,
+              semantic: false,
+              reason: 'exact_cache_hit',
+              requestId
+            }), {
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          } catch (parseError) {
+            console.warn(`⚠️ [INSTANT] Failed to parse cache entry: ${parseError}`);
+          }
+        }
+        
+        console.log(`⚡ [INSTANT] No instant options found`);
+        return new Response(JSON.stringify({
+          success: false,
+          reason: 'no_instant_options',
+          requestId
+        }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+        
+      } catch (error) {
+        console.error(`❌ [INSTANT] Error: ${error}`);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Instant lookup failed',
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
-      else {
-        logWithContext('warn', requestId, '❌ [WORKER] Route not found', { path: url.pathname }, env);
-        response = new Response('Not Found', { status: 404, headers: corsHeaders });
-      }
-
-      const totalDuration = Date.now() - requestStartTime;
-      
-      // Determine cache status based on response content
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        try {
-          const responseClone = response.clone();
-          const json = await responseClone.json() as { cached?: boolean; semantic?: boolean; success?: boolean };
-          if (json.cached === true) {
-            cacheStatus = json.semantic ? 'semantic_hit' : 'kv_hit';
-            kvLookups++;
-          } else if (json.success === false) {
-            cacheStatus = 'error';
-          } else {
-            cacheStatus = 'generated';
-            externalApiCalls++; // New generation = external API call
-          }
-        } catch {
-          cacheStatus = 'unknown';
-        }
-      }
-      
-      logWithContext('info', requestId, '✅ [WORKER] Request completed', {
-        status: response.status,
-        duration: totalDuration,
-        path: url.pathname,
-        cloudflareMetrics: {
-          cacheStatus,
-          kvLookups, 
-          externalApiCalls,
-          subrequestCount,
-          // This helps correlate with Cloudflare Analytics
-          explanation: {
-            cached_subrequests: kvLookups > 0 && cacheStatus.includes('hit') ? 'KV cache hit (not counted by CF)' : 'No KV hits',
-            uncached_subrequests: externalApiCalls > 0 ? `External API calls: ${externalApiCalls}` : 'No external calls',
-            cf_analytics_note: 'CF analytics only counts HTTP cache, not KV cache'
-          }
-        }
-      }, env);
-
-      return response;
-
-    } catch (error) {
-      const totalDuration = Date.now() - requestStartTime;
-      logWithContext('error', requestId, '💥 [WORKER] Unhandled error', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        duration: totalDuration,
-        path: url.pathname
-      }, env);
-
-      return new Response(JSON.stringify({ error: 'Internal server error' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
     }
+
+    // NEW: TIER 2 & 3 - MULTI-TIER endpoint (fast + final generation)
+    if (url.pathname === '/api/generateImage/multiTier' && request.method === 'POST') {
+      try {
+        const { prompt, tiers = ['fast', 'final'], maxTiers = 2 } = await request.json() as { 
+          prompt: string; 
+          tiers?: Array<'fast' | 'final'>;
+          maxTiers?: number;
+        }
+        
+        console.log(`🚀 [MULTI-TIER] Starting generation for tiers: ${tiers.join(', ')}`);
+        
+        // Use appropriate generation function based on tier priority
+        if (tiers.includes('fast')) {
+          // Use fast generation for speed
+          const response = await generateStoryboardImageFast(prompt, env, requestId);
+          
+          // Add CORS headers
+          if (response.ok) {
+            const responseData = await response.json() as any;
+            responseData.tier = 'fast';
+            
+            return new Response(JSON.stringify(responseData), {
+              status: response.status,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          }
+          
+          return new Response(response.body, {
+            status: response.status,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        } else if (tiers.includes('final')) {
+          // Use optimized generation for final quality
+          const response = await generateStoryboardImageOptimized(prompt, env, requestId);
+          
+          // Add tier information to the response
+          if (response.ok) {
+            const responseData = await response.json() as any;
+            responseData.tier = 'final';
+            responseData.confidence = 0.95; // High confidence for generated images
+            
+            return new Response(JSON.stringify(responseData), {
+              status: response.status,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          }
+          
+          return new Response(response.body, {
+            status: response.status,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
+        
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'No valid tiers specified',
+          requestId
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+        
+      } catch (error) {
+        console.error(`❌ [MULTI-TIER] Error: ${error}`);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Multi-tier generation failed',
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+    }
+
+    // NEW: BACKGROUND endpoint (fire-and-forget quality improvement)
+    if (url.pathname === '/api/generateImage/background' && request.method === 'POST') {
+      try {
+        const { prompt, tiers = ['final'] } = await request.json() as { 
+          prompt: string; 
+          tiers?: Array<'fast' | 'final'>;
+        }
+        
+        console.log(`🔥 [BACKGROUND] Starting background generation for: "${prompt.substring(0, 30)}..."`);
+        
+        // Fire and forget - generate the higher quality version
+        if (tiers.includes('final')) {
+          // Don't await - run in background
+          generateStoryboardImage(prompt, env, `${requestId}-bg`).catch(error => {
+            console.warn(`⚠️ [BACKGROUND] Background generation failed: ${error}`);
+          });
+        }
+        
+        // Return immediately
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Background generation started',
+          requestId
+        }), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+        
+      } catch (error) {
+        console.error(`❌ [BACKGROUND] Error: ${error}`);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Background generation setup failed',
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+    }
+
+    // Typing pattern analysis endpoint
+    if (url.pathname === '/api/analyzeTyping' && request.method === 'POST') {
+      try {
+        const pattern = await request.json()
+        const result = await analyzeTypingPattern(pattern, env, requestId)
+        
+        return new Response(JSON.stringify(result), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        })
+      } catch (error) {
+        console.error(`❌ [WORKER] Error in analyzeTyping: ${error}`)
+        return new Response(JSON.stringify({ 
+          predictions: [], 
+          confidence: 0, 
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        })
+      }
+    }
+    
+    // Semantic cache check endpoint
+    if (url.pathname === '/api/semanticCheck' && request.method === 'POST') {
+      try {
+        const { prompt } = await request.json() as { prompt: string }
+        const result = await checkSemanticCache(prompt, env, requestId)
+        
+        return new Response(JSON.stringify({
+          found: !!result,
+          url: result?.persistentUrl,
+          confidence: result?.qualityScore || 0,
+          requestId
+        }), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        })
+      } catch (error) {
+        console.error(`❌ [WORKER] Error in semanticCheck: ${error}`)
+        return new Response(JSON.stringify({ 
+          found: false, 
+          requestId 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        })
+      }
+    }
+    
+    return new Response('Not Found', { 
+      status: 404,
+      headers: corsHeaders
+    })
   }
 }
 
