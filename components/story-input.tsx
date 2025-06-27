@@ -237,7 +237,11 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
     if (!newPrompt.trim()) {
       setShouldGenerate(false);
       setUserState('typing');
-      setCurrentImageTier(null);
+      // FIXED: Only clear tier if we actually had an empty prompt before
+      // This prevents the image from disappearing when user clicks on input with existing text
+      if (!prompt.trim()) {
+        setCurrentImageTier(null);
+      }
       rhythmRef.current.deletionStreak = 0;
       rhythmRef.current.isInDeletionMode = false;
       console.log('🚫 [INPUT] Empty prompt, generation cancelled');
@@ -252,11 +256,11 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       // Check cache first
       const cachedImage = getCachedImage(newPrompt);
              if (cachedImage) {
-         console.log('🎯 [FIRST INPUT] Using cached image');
-         onImageGenerated(cachedImage, 'instant');
-         setCurrentImageTier('instant');
-         setLastGeneratedPrompt(newPrompt.trim().toLowerCase());
-         setIsFirstInput(false);
+        console.log('🎯 [FIRST INPUT] Using cached image');
+        onImageGenerated(cachedImage, 'instant');
+        setCurrentImageTier('instant');
+        setLastGeneratedPrompt(newPrompt.trim().toLowerCase());
+        setIsFirstInput(false);
       } else {
         console.log('🎨 [FIRST INPUT] No cache, triggering multi-tier generation');
         triggerMultiTierGeneration(newPrompt, true); // First input = all tiers
@@ -298,7 +302,7 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
         setIsFirstInput(false);
       }
     }, delay);
-  }, [analyzeUserIntent, isFirstInput, onImageGenerated, lastGeneratedPrompt]);
+  }, [analyzeUserIntent, isFirstInput, onImageGenerated, lastGeneratedPrompt, prompt]);
 
   // NEW: Trigger instant check for immediate cache hits
   const triggerInstantCheck = useCallback(async (promptText: string) => {
@@ -425,10 +429,6 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
       console.log('💾 [SHOTDECKAI] Cached prompts:', Object.keys(cache));
     } else {
       console.log('💾 [SHOTDECKAI] Starting with empty cache');
-    }
-    
-    if (textareaRef.current) {
-      textareaRef.current.focus();
     }
   }, []);
 
@@ -563,8 +563,15 @@ export function StoryInput({ onImageGenerated, onGenerationStart }: StoryInputPr
             autoComplete="off"
             value={prompt}
             onChange={(e) => handlePromptChange(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onFocus={() => {
+              console.log('🎯 [FOCUS] Input focused, current prompt:', prompt);
+              console.log('🎯 [FOCUS] Current tier:', currentImageTier);
+              setIsFocused(true);
+            }}
+            onBlur={() => {
+              console.log('👋 [BLUR] Input blurred, current prompt:', prompt);
+              setIsFocused(false);
+            }}
             style={{ fontSize: '16px' }}
           />
           <Button 
